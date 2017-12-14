@@ -12,12 +12,12 @@
 
 <rfc category="info" docName="draft-erdtman-jose-jcs-00" ipr="trust200902">
  <front>
-   <title abbrev="draft-erdtman-jose-rpcc">
-     JSON Cleartext Signature (JCE)
+   <title abbrev="draft-erdtman-jose-jcs">
+     JSON Cleartext Signature (JCS)
    </title>
 
    <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
-     <organization></organization>
+     <organization>Independent</organization>
      <address>
        <postal>
          <street></street>
@@ -53,12 +53,12 @@
    <abstract>
      <t>
        JCS is a scheme for signing data expressed as cleartext JSON
-       <xref target="RFC7159"/> objects, the signature is enveloped in the data.
-       JCS builds on JWS <xref target="RFC7515"/>, JWA <xref target="RFC7518"/>
-       and JWK <xref target="RFC7517"/> for most parts, e.g. headers,
-       algorithms and key packaging. Serialisation of the data to be signed
-       depends on the introduction of predictable serialisation in ECMAScript
-       version 6 <xref target="ES6"/>.
+       <xref target="RFC7159"/> objects, the signature is enveloped in the JSON
+       object to be signed. JCS builds on JWS <xref target="RFC7515"/>, JWA
+       <xref target="RFC7518"/> and JWK <xref target="RFC7517"/> for most
+       parts, e.g. headers, algorithms and key packaging. Serialization of the
+       JSON object to be signed depends on the introduction of predictable
+       Serialization in ECMAScript version 6 <xref target="ES6"/>.
      </t>
    </abstract>
  </front>
@@ -67,23 +67,23 @@
   <section title="Introduction">
     <t>
       JCS is a scheme for signing data expressed as cleartext JSON
-      objects, the signature is enveloped in the data. By enveloping the
-      signature in the data it is easy inspect data in transit and when archived
-      integrity can be guaranteed.
+      objects, the signature is enveloped in the JSON object to be signed. By
+      enveloping the signature in the JSON object to be signed it is easy
+      inspect data in transit and when archived integrity can be guaranteed.
     </t>
     <t>
       For most parts JCS reuses the constructs form JWS, JWA and JWK. Headers
       form JWS, algorithms from JWA and the key structure form JWK. There are
       two essential differences from JWS. First JCS signatures are enveloped in
-      the signed data. Secondly it depends on predictable JSON serialisation
-      instead of ASCII armouring the data to be signed.
+      the signed data. Secondly it depends on predictable JSON Serialization
+      instead of ASCII armoring the data to be signed.
     </t>
     <t>
       In the following example there are a few things to note. The signature is
       embedded in the data. The attributes in the signature construct is the JWS
-      headers with the one add-on, the value attribute which contains the raw
-      signature bytes base64url encoded.
-      <figure align="center" anchor="fig:examplesignature" title='JCS example signature'>
+      headers with one add-on, the 'value' attribute which contains the
+      base64url encoded signature bytes.
+      <figure align="center" anchor="fig:examplesignature" title='JCS signed example'>
   	    <artwork>
 <![CDATA[
 {
@@ -120,50 +120,20 @@
   <section anchor="SignatureConstruct" title="The Signature Construct">
     <t>
       The signature attribute that is added to the data is essentially the JWS
-      header, but with the additional attribute value which contains the
-      signature value.
+      header, but with the additional attribute "value", which contains the
+      encoded signature value.
     </t>
     <t>
       When putting the signature construct into the data to be signed it MUST
-      be put labeled with a the key 'signature', i.e. the data to be signed
-      cannot have its own root item that is named signature (or signatures).
+      be put labeled with a the key "signature", i.e. the object to be signed
+      cannot have its own root item that is named "signature" (or "signatures").
     </t>
     <section anchor="SignatureConstructValueAttribute" title="The Value attribute">
       <t>
-        This specification registers the new header "value". The value contians the
-        base64url encoded signature.
+        This specification registers the new JWS/JWE header "value". The value
+        of this attribute contains the base64url-encoded signature as a string.
       </t>
     </section>
-  </section>
-
-  <section anchor="SignatureScope" title="Signature Scope">
-    <t>
-      The scope of a signature, what is actually signed, comprises all
-      properties including possible child objects of the JSON object holding
-      the signature property except for the value property in the signature
-      attribute.
-    </t>
-  </section>
-
-  <section anchor="MultipleSignatures" title="Multiple Signatures">
-    <t>
-      Multiple signatures enable different keys to independently of each other
-      add a signature to a JSON object
-    </t>
-    <t>
-      The normalisation procedure is essentially the same as for single
-      signatures but must also take the following in account as well:
-      <list style="symbols">
-        <t>
-          The "signature" property must be "signatures" and contain an array
-          of signature constructs.
-        </t>
-        <t>
-          Each signature requires its own normalisation process. During this
-          process the other signature objects must (temporarily) be removed.
-        </t>
-      </list>
-    </t>
   </section>
 
   <section anchor="ProducingConsumingJCSs" title="Producing and Consuming JCSs">
@@ -180,26 +150,24 @@
           </t>
           <t>
             Create the signature object with the headers to be used and add it
-            as a top level attribute to the object to be signed.
+            as a top level attribute to the object to be signed with the key
+            "signature".
           </t>
           <t>
-            Serialise the object to be signed using the serialisation and
-            normalisation rules defined in section
-            <xref target="SerialisationNormalisation" />
+            Serialize the object to be signed using the Serialization and
+            normalization rules defined in
+            <xref target="Serializationnormalization" />
           </t>
           <t>
             Compute the JSC Signature in the manner defined for the particular
-            algorithm being used over the serialised object to be signed. The
-            "alg" (algorithm) Header Parameter MUST be present in the JOSE
-            Header, with the algorithm value accurately representing the
+            algorithm being used over the Serialized object to be signed. The
+            "alg" (algorithm) Header Parameter MUST be present in the signatuer
+            construct, with the algorithm value accurately representing the
             algorithm used to construct the JWS Signature.
           </t>
           <t>
-            Compute the encoded signature value BASE64URL(JSC Signature)
-          </t>
-          <t>
-            Add the 'value' attribute to the signature object with the encoded
-            JCS signature.
+            Add the "value" attribute to the signature object with the encoded
+            JCS signature, BASE64URL(JSC Signature).
           </t>
         </list>
       </t>
@@ -234,17 +202,17 @@
             are also understood and supported.
           </t>
           <t>
-            Save and remove 'value' attribute from the signature object.
-            Base64url-decode the encoded representation of the JCS Signature,
+            Save and remove "value" attribute from the signature object and
+            base64url-decode the encoded representation of the JCS Signature.
           </t>
           <t>
-            Serialise and normalise data including signature object, by
-            following the rules in section
-            <xref target="SerialisationNormalisation" />
+            Serialize and normalise the signed object including the signature
+            object, by following the rules in
+            <xref target="Serializationnormalization" />.
           </t>
           <t>
             Validate the JCS Signature against the JCS Signing Input, i.e. the
-            serialised and normalised data, in the manner defined for the
+            Serialized and Normalized data, in the manner defined for the
             algorithm being used, which MUST be accurately represented by the
             value of the "alg" (algorithm) Header Parameter (parameter in
             signature object), which MUST be present. Record whether the
@@ -255,29 +223,29 @@
             successfully validated.
           </t>
           <t>
-            For later validation of data put back the 'value' attribute in the
-            signature.
+            For later validation of the signed object put back the "value"
+            attribute in the signature.
           </t>
         </list>
       </t>
     </section>
-    <section anchor="SerialisationNormalisation" title="Serialisation and Normalisation">
+    <section anchor="Serializationnormalization" title="Serialization and normalization">
       <t>
-        Rules for (de)serialisation of signed or data to be signed.
+        Rules for (de)serialization of the signed object or object to be signed.
         <list style="symbols">
           <t>
-            The original property serialisation order must be preserved as
-            described by ECMAScript [ES6] section 9.1.12.
+            The original property serialization order MUST be preserved as
+            described by ECMAScript <xref target="ES6"/> section 9.1.12.
           </t>
           <t>
-            JSON data of the type "Number", processed according to ECMAScript [ES6]
-            section 7.1.12.1.
+            JSON data of the type "Number", MUST be processed according to
+            ECMAScript <xref target="ES6"/> section 7.1.12.1.
           </t>
           <t>
-            Property names must not be empty ("").
+            Property names MUST NOT be empty ("").
           </t>
           <t>
-            Property names must be unique.
+            Property names MUST be unique.
           </t>
         </list>
       </t>
@@ -285,7 +253,7 @@
         Steps to normalise data to be signed or verified.
         <list style="symbols">
           <t>
-            The value property must be deleted from the signature sub object.
+            The value property must be deleted from the signature object.
           </t>
           <t>
             Whitespace must be removed which in practical terms means removal
@@ -297,7 +265,7 @@
             "degenerate" equivalents to '/' by rewriting them.
           </t>
           <t>
-            As specified by ECMAScript [ES6] section 24.3.2.2:
+            As specified by ECMAScript <xref target="ES6"/> section 24.3.2.2:
             <list style="symbols">
               <t>
                 Unicode escape sequences (\uhhhh) within quoted strings must be
@@ -316,11 +284,11 @@
       <t>
         When rules has been applied to the example signature it looks like this. The output
         string was folded for improving readability.
-        <figure align="center" anchor="fig:normalisedExample" title='Normalised example'>
+        <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
           <artwork>
 <![CDATA[
 {"iss":"joe","exp":1300819380,"http://example.com/is_root":true,
-"signature": {"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
+"signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
 "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aP
 j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
 ]]>
@@ -328,13 +296,42 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
         </figure>
       </t>
     </section>
+    <section anchor="MultipleSignatures" title="Multiple Signatures">
+      <t>
+        Multiple signatures enable different keys to independently of each other
+        add a signature to a JSON object.
+      </t>
+      <t>
+        The normalization procedure is essentially the same as for single
+        signatures but must also take the following in account as well:
+        <list style="symbols">
+          <t>
+            The "signature" property must be "signatures" and contain an array
+            of signature constructs.
+          </t>
+          <t>
+            Each signature requires its own normalization process. During this
+            process the other signature objects must (temporarily) be removed.
+          </t>
+        </list>
+      </t>
+    </section>
+  </section>
+
+  <section anchor="SignatureScope" title="Signature Scope">
+    <t>
+      The scope of a signature, what is actually signed, comprises all
+      properties including possible child objects of the JSON object holding
+      the signature property except for the "value" property in the signature
+      object.
+    </t>
   </section>
 
   <section anchor="IANA" title="IANA Considerations">
     <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
       <t>
         This section registers the "value" header parameter in the "JSON Web
-        Signature and Encryption Header Parameters" registry [IANA.MediaTypes]
+        Signature and Encryption Header Parameters" registry
         in the manner described in <xref target="RFC7515"/>, which is used to
         hold the signature value of the JCS.
       </t>
@@ -342,7 +339,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
         <t>
           <list style='symbols'>
             <t>Header Parameter Name: <spanx style="verb">value</spanx></t>
-            <t>Header Parameter Description: The encoded signature value.</t>
+            <t>Header Parameter Description: The base64url-encoded signature value.</t>
             <t>Header Parameter Usage Location(s): <spanx style="verb">JCS</spanx></t>
             <t>Change Controller: IESG</t>
             <t>Specification Document(s): <xref target="SignatureConstructValueAttribute"/></t>
