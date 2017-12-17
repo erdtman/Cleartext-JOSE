@@ -327,6 +327,15 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
     </t>
   </section>
 
+  <section anchor="ES6Interoperability" title="ES6+ Interoperability">
+    <t>
+      The scope of a signature, what is actually signed, comprises all
+      properties including possible child objects of the JSON object holding
+      the signature property except for the "value" property in the signature
+      object.
+    </t>
+  </section>
+
   <section anchor="IANA" title="IANA Considerations">
     <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
       <t>
