@@ -40,7 +40,7 @@
      </address>
    </author>
 
-   <date year="2017" />
+   <date year="2018" />
 
    <area>Security</area>
 
@@ -53,7 +53,7 @@
    <abstract>
      <t>
        JCS is a scheme for signing data expressed as cleartext JSON
-       <xref target="RFC7159"/> objects, the signature is enveloped in the JSON
+       <xref target="RFC8259"/> objects, the signature is enveloped in the JSON
        object to be signed. JCS builds on JWS <xref target="RFC7515"/>, JWA
        <xref target="RFC7518"/> and JWK <xref target="RFC7517"/> for most
        parts, e.g. headers, algorithms and key packaging. Serialization of the
@@ -98,7 +98,7 @@
       "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
       "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
     },
-    "value": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
+    "val": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
   }
 }
 ]]>
@@ -120,7 +120,7 @@
   <section anchor="SignatureConstruct" title="The Signature Construct">
     <t>
       The signature attribute that is added to the data is essentially the JWS
-      header, but with the additional attribute "value", which contains the
+      header, but with the additional attribute "val", which contains the
       encoded signature value.
     </t>
     <t>
@@ -130,7 +130,7 @@
     </t>
     <section anchor="SignatureConstructValueAttribute" title="The Value attribute">
       <t>
-        This specification registers the new JWS/JWE header "value". The value
+        This specification registers the new JWS/JWE header "val". The value
         of this attribute contains the base64url-encoded signature as a string.
       </t>
     </section>
@@ -166,7 +166,7 @@
             algorithm used to construct the JWS Signature.
           </t>
           <t>
-            Add the "value" attribute to the signature object with the encoded
+            Add the "val" attribute to the signature object with the encoded
             JCS signature, BASE64URL(JSC Signature).
           </t>
         </list>
@@ -202,7 +202,7 @@
             are also understood and supported.
           </t>
           <t>
-            Save and remove "value" attribute from the signature object and
+            Save and remove "val" attribute from the signature object and
             base64url-decode the encoded representation of the JCS Signature.
           </t>
           <t>
@@ -223,7 +223,7 @@
             successfully validated.
           </t>
           <t>
-            For later validation of the signed object put back the "value"
+            For later validation of the signed object put back the "val"
             attribute in the signature.
           </t>
         </list>
@@ -231,29 +231,31 @@
     </section>
     <section anchor="Serializationnormalization" title="Serialization and normalization">
       <t>
-        Rules for (de)serialization of the signed object or object to be signed.
+        When having headers in cleartext serialization of them needs to be
+        consistent across platforms. JSON <xref target="RFC8259" /> by it self does not produce
+        predictable serialization of data. However ES6 defines how to produce
+        JOSN that is predictable. By following the ES6 serialization directives
+        one get predictable results, i.e. the JOSN serializer MUST follow the
+        directives set out by ES6 when serializing data. Rules defined below
+        takes the essence from the ES6 specification and list what that means
+        in practical terms.
+      </t>
+      <t>
+        Rules for serialization of the signed object or object to be signed.
         <list style="symbols">
           <t>
             The original property serialization order MUST be preserved as
-            described by ECMAScript <xref target="ES6"/> section 9.1.12.
+            described by ECMAScript section 9.1.12.
           </t>
           <t>
             JSON data of the type "Number", MUST be processed according to
-            ECMAScript <xref target="ES6"/> section 7.1.12.1.
+            ECMAScript section 7.1.12.1.
           </t>
           <t>
             Property names MUST NOT be empty ("").
           </t>
           <t>
             Property names MUST be unique.
-          </t>
-        </list>
-      </t>
-      <t>
-        Steps to normalise data to be signed or verified.
-        <list style="symbols">
-          <t>
-            The value property must be deleted from the signature object.
           </t>
           <t>
             Whitespace must be removed which in practical terms means removal
@@ -265,19 +267,14 @@
             "degenerate" equivalents to '/' by rewriting them.
           </t>
           <t>
-            As specified by ECMAScript <xref target="ES6"/> section 24.3.2.2:
-            <list style="symbols">
-              <t>
-                Unicode escape sequences (\uhhhh) within quoted strings must be
-                adjusted as follows: If the Unicode value falls within the
-                traditional ASCII control character range (0x00 - 0x1f), it must
-                be rewritten in lowercase hexadecimal notation unless it is one
-                of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
-                the latter have precedence. If the Unicode value is outside of
-                the ASCII control character range, it must be replaced by the
-                corresponding Unicode character.
-              </t>
-            </list>
+            Unicode escape sequences (\uhhhh) within quoted strings must be
+            adjusted as follows: If the Unicode value falls within the
+            tradditional ASCII control character range (0x00 - 0x1f), it must
+            be rewritten in lowercase hexadecimal notation unless it is one
+            of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
+            the latter have precedence. If the Unicode value is outside of
+            the ASCII control character range, it must be replaced by the
+            corresponding Unicode character. ECMAScript section 24.3.2.2.
           </t>
         </list>
       </t>
@@ -295,6 +292,17 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
           </artwork>
         </figure>
       </t>
+      <section anchor="ES6Interoperability" title="ES6+ Interoperability">
+        <t>
+          For JavaScript optimization reasons, ES6+'s JSON.parse() internally
+          rearranges order of properties with names expressed as integers, making a
+          parsed JSON string like '{"2":"a", "A":"b","1":"c"}' actually serialize as
+          '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST in
+          an here unspecified way, "emulate" this scheme since this behavior is not
+          intended to be an additional requirement to support by JSON tools in
+          general in order to use this specification.
+        </t>
+      </section>
     </section>
     <section anchor="MultipleSignatures" title="Multiple Signatures">
       <t>
@@ -322,16 +330,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
     <t>
       The scope of a signature, what is actually signed, comprises all
       properties including possible child objects of the JSON object holding
-      the signature property except for the "value" property in the signature
-      object.
-    </t>
-  </section>
-
-  <section anchor="ES6Interoperability" title="ES6+ Interoperability">
-    <t>
-      The scope of a signature, what is actually signed, comprises all
-      properties including possible child objects of the JSON object holding
-      the signature property except for the "value" property in the signature
+      the signature property except for the "val" property in the signature
       object.
     </t>
   </section>
@@ -339,7 +338,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
   <section anchor="IANA" title="IANA Considerations">
     <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
       <t>
-        This section registers the "value" header parameter in the "JSON Web
+        This section registers the "val" header parameter in the "JSON Web
         Signature and Encryption Header Parameters" registry
         in the manner described in <xref target="RFC7515"/>, which is used to
         hold the signature value of the JCS.
@@ -379,7 +378,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
  <back>
    <references title="Normative References">
      <?rfc include='reference.RFC.2119'?>
-     <?rfc include='reference.RFC.7159'?>
+     <?rfc include='reference.RFC.8259'?>
      <?rfc include='reference.RFC.7515'?>
      <?rfc include='reference.RFC.7517'?>
      <?rfc include='reference.RFC.7518'?>

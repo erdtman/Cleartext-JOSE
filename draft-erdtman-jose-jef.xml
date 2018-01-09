@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+
+<?rfc strict="yes" ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="4"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="yes" ?>
+<?rfc subcompact="no" ?>
+
+<rfc category="info" docName="draft-erdtman-jose-jef-00" ipr="trust200902">
+ <front>
+   <title abbrev="draft-erdtman-jose-jef">
+     JSON Encryption Format (JEF)
+   </title>
+
+   <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
+     <organization>Independent</organization>
+     <address>
+       <postal>
+         <street></street>
+         <code></code> <city></city>
+         <country>France</country>
+       </postal>
+       <email>anders.rundgren.net@gmail.com</email>
+     </address>
+   </author>
+
+   <author fullname="Samuel Erdtman" initials="S." surname="Erdtman">
+     <organization>Spotify AB</organization>
+     <address>
+       <postal>
+         <street>Birger Jarlsgatan 61, 4tr</street>
+         <code>113 56</code> <city>Stockholm</city>
+         <country>Sweden</country>
+       </postal>
+       <email>erdtman@spotify.com</email>
+     </address>
+   </author>
+
+   <date year="2018" />
+
+   <area>Security</area>
+
+   <workgroup>Javascript Object Signing and Encryption</workgroup>
+
+   <keyword>
+     JOSE, Signing, Encryption, Cleartext
+   </keyword>
+
+   <abstract>
+     <t>
+       JSON Encryption Format (JEF), represents encrypted content using
+       JSON-based data structures. With the use of predictable serialization
+       defined in ECMAScript version 6 <xref target="ES6"/> protected headers
+       can remain cleartext. JEF reuses headers and most of the processing
+       semantics form JWE, but does not directly build on its JSON format.
+       Cryptographic algorithms and identifiers for use with this specification
+       are described in the separate JSON Web Algorithms <xref target="RFC7518" />.
+     </t>
+   </abstract>
+ </front>
+
+<middle>
+  <section anchor="Introduction" title="Introduction">
+    <t>
+      JSON Encryption Format (JEF), represents encrypted content using
+      JSON-based data structures. With the use of predictable serialization
+      defined in ECMAScript version 6 <xref target="ES6"/> protected headers
+      can remain cleartext. JEF reuses headers and most of the processing
+      semantics form JWE, but does not directly build on its JSON format.
+      Cryptographic algorithms and identifiers for use with this specification
+      are described in the separate JSON Web Algorithms (JWA).
+    </t>
+    <t>
+      By keeping headers in cleartext the structure is very easy to read.
+      However with cleartext headers it is not suitable for all purposes, e.g.
+      transport as HTTP query parameter is not possible without additional
+      encoding.
+    </t>
+    <t>
+      Why not build directly on the JWE JSON Format? In the original JWE format
+      all data that are to be protected needs to be ASCII armored
+      (base64url-encoded), as a JOSN format this becomes a contradiction in it
+      self. In the JWE JSON format ASCII armoring only the parts that must be
+      protected solves this (most of the data can then be JSON).  By serializing
+      the JSON directly for protection it is more direct to serialize the whole
+      package including, headers, recipients and the encrypted key than just the
+      protected header part. Further more this makes reasoning about the
+      package easier since the whole thing is protected (not just parts).
+    </t>
+  </section>
+
+  <section title="Terminology">
+    <t>
+      The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+      NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+      "MAY", and "OPTIONAL" in this document are to be interpreted as
+      described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>
+      when, and only when, they appear in all capitals, as shown here.
+    </t>
+  </section>
+
+  <section anchor="EncryptionStructure" title="Encryption Structure">
+    <t>
+      This section explains how the encryption structure is formed for the
+      different cases available.
+    </t>
+    <t>
+      The outermost layer contains the equivalence to JWE headers with the
+      addition of "recipients", "encrypted_key", and "ciphertext".
+    </t>
+    <t>
+      Recipients has the same usage as in the JWE JSON format, but the structure
+      is slightly different instead of an object with attributes "header" and
+      "encrypted_key" these have been collapsed to on. The recipients array MUST
+      only be included when the message is addressed to multiple recipients.
+    </t>
+    <t>
+      The "encrypted_key" attribute is used on the root level when there is only
+      one recipient i.e. the recipients array is not present. When multiple
+      recipients are targeted there is one "encrypted_key" value for each of them
+      in the recipients array.
+    </t>
+    <t>
+      <figure align="center" anchor="fig:JEFStructure" title='JEF JSON structure'>
+        <artwork>
+<![CDATA[
+{
+  <JWE Headers />,
+  "recipients": [{
+    <JWE Headers />,
+    "encrypted_key": "<base64url-encoded data />"
+  }],
+  "encrypted_key": "<base64url-encoded data />"
+  "iv": "<base64url-encoded data />",
+  "tag": "<base64url-encoded data />",
+  "ciphertext": "<base64url-encoded data />"
+}
+]]>
+        </artwork>
+      </figure>
+    </t>
+    <t>
+      Depending on the Key Management Mode and number of recipients the
+      structure and used attributes differs slightly.
+    </t>
+    <section anchor="OneRecipient" title="One recipient">
+      <t>
+        For the simple case of Direct Encryption mode, parameters "alg",
+        "encrypted_key" and "recipients" are not used and "kid" refers to the
+        CEK if used. <xref target="fig:DirectEncryptionExample"/> shows such an
+        example.
+        <figure align="center" anchor="fig:DirectEncryptionExample" title='Direct Encryption Example'>
+          <artwork>
+<![CDATA[
+{
+  "enc": "A128CBC-HS256",
+  "kid": "secret-key"
+  "iv": "SgD79riBvQPjoRd1sV4Bjg",
+  "tag": "kBSE1sRUFqtRXT7iapqEqw",
+  "ciphertext": "E8jqajE5MQxwuFCewsxS-2EzA8MU5Ye9kcd52u20RqY"
+}
+]]>
+          </artwork>
+        </figure>
+      </t>
+      <t>
+        For the case of Key Encryption mode a public key has been used to
+        encrypt the CEK so "alg" and "encrypted_key" attributes are used here
+        but recipients are left out since only of recipient is targeted.
+        <xref target="fig:KeyEncryptionExample"/> shows such an
+        example.
+        <figure align="center" anchor="fig:KeyEncryptionExample" title='Key Encryption Example'>
+          <artwork>
+<![CDATA[
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
+    "y": "5UEVUw9aIICGszcsg_Y1Uem7swqEe3RqgbzSJTpkwow"
+  },
+  "encrypted_key": "9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjXBqIqs9",
+  "iv": "SgD79riBvQPjoRd1sV4Bjg",
+  "tag": "kBSE1sRUFqtRXT7iapqEqw",
+  "ciphertext": "E8jqajE5MQxwuFCewsxS-2EzA8MU5Ye9kcd52u20RqY"
+}
+]]>
+          </artwork>
+        </figure>
+      </t>
+    </section>
+    <section anchor="KeyEncryptionExample" title="Two or more recipients">
+      <t>
+        Two or more recipients can be addressed with key management modes, Key
+        Encryption, Key Wrapping and Key Agreement with Key Wrapping. When
+        addressing multiple recipients the recipients array are used. The
+        recipients array contains a list of objects containing needed headers
+        and an encrypted CEK ("encrypted_key"). If a header is present in both
+        the root and at recipient level, then recipient level has precedence.
+
+        <figure align="center" anchor="fig:KeyEncryptionExamplewithonerecipient" title='Key Encryption Example with one recipient'>
+          <artwork>
+<![CDATA[
+{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "recipients": [{
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
+      "y": "5UEVUw9aIICGszcsg_Y1Uem7swqEe3RqgbzSJTpkwow"
+    },
+    "encrypted_key": "9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjX"
+  },{
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "w24AEzLQkT66dkMGaS0ALdRVVV-qWkBY-MnvaE-X8tVfM_rKtCftPnWtj",
+      "y": "pRguD1TD-p5CScIg1QgGgOy15BCSjzVmCcOWgR1wuMaCCop559kNz7d"
+    },
+    "encrypted_key": "D0r_Lnj_397CCPrK_gREltirxstOlt4qQgNC_mHy80c4ODr"
+  }],
+  "iv": "SgD79riBvQPjoRd1sV4Bjg",
+  "tag": "kBSE1sRUFqtRXT7iapqEqw",
+  "ciphertext": "E8jqajE5MQxwuFCewsxS-2EzA8MU5Ye9kcd52u20RqY"
+}
+]]>
+          </artwork>
+        </figure>
+      </t>
+    </section>
+    <section anchor="AdditionallyAuthenticatedData" title="Additionally Authenticated Data (aad)">
+      <t>
+        As a difference to JWE JOSN representation JEF does not have a specific
+        "aad" attribute. Since JEF integrity protects the whole header
+        structure it is recommended that one add additional headers to protect
+        additional cleartext data that needs to be connected to the ciphertext.
+        See JWE section 4.2. Public Header Parameter Names and 4.3. Private
+        Header Parameter Names for details on how to add additional headers.
+      </t>
+    </section>
+  </section>
+
+  <section anchor="EncryptingandDecryptingJEFs" title="Encrypting and Decrypting JEFs">
+    <section anchor="MessageEncryption" title="Message Encryption">
+      <t>
+        The message encryption process is as follows.  The order of the steps
+        is not significant in cases where there are no dependencies between
+        the inputs and outputs of the steps.
+      </t>
+      <t>
+        Most steps are equal to the once in JWE, those that has been changed
+        are indicated so.
+      </t>
+      <t>
+        <list style="numbers">
+          <t>
+            Determine the Key Management Mode employed by the algorithm used
+            to determine the Content Encryption Key value.  (This is the
+            algorithm recorded in the "alg" (algorithm) Header Parameter of
+            the resulting JWE.)
+          </t>
+          <t>
+            When Key Wrapping, Key Encryption, or Key Agreement with Key
+            Wrapping are employed, generate a random CEK value.  See RFC
+            4086 [RFC4086] for considerations on generating random values.
+            The CEK MUST have a length equal to that required for the
+            content encryption algorithm ("enc").
+          </t>
+          <t>
+            When Direct Key Agreement or Key Agreement with Key Wrapping are
+            employed, use the key agreement algorithm to compute the value
+            of the agreed upon key.  When Direct Key Agreement is employed,
+            let the CEK be the agreed upon key.  When Key Agreement with Key
+            Wrapping is employed, the agreed upon key will be used to wrap
+            the CEK.
+          </t>
+          <t>
+            When Key Wrapping, Key Encryption, or Key Agreement with Key
+            Wrapping are employed, encrypt the CEK to the recipient and let
+            the result be the JWE Encrypted Key ("encrypted_key").
+          </t>
+          <t>
+            When Direct Encryption is employed, let the CEK be the shared
+            symmetric key.
+          </t>
+          <t>
+            Compute the encoded key value BASE64URL(JWE Encrypted Key).
+          </t>
+          <t>
+            If more than one recipient is being addressed, repeat this process
+            (steps 1-7) for each recipient.
+          </t>
+          <t>
+            Generate a random JWE Initialization Vector of the correct size
+            for the content encryption algorithm (if required for the
+            algorithm); otherwise, let the JWE Initialization Vector be the
+            empty octet sequence.
+          </t>
+          <t>
+            Compute the encoded Initialization Vector value BASE64URL(JWE
+            Initialization Vector).
+          </t>
+          <t>
+            If a "zip" parameter was included, compress the plaintext using
+            the specified compression algorithm and let M be the octet
+            sequence representing the compressed plaintext; otherwise, let M
+            be the octet sequence representing the plaintext.
+          </t>
+          <t>
+            Create the JSON object(s) containing the desired set of Header
+            Parameters. including "encrypted_key" if one recipient is addressed
+            or "recipients" array if more than one recipient is addressed.
+            (modified)
+          </t>
+          <t>
+            Serialize the JOSN headers according to instructions in
+            <xref target="Serialization" />. (modified)
+          </t>
+          <t>
+            Let the Additional Authenticated Data encryption parameter be
+            the serialized JOSN header. (modified)
+          </t>
+          <t>
+            Encrypt M using the CEK, the JWE Initialization Vector, and the
+            Additional Authenticated Data value using the specified content
+            encryption algorithm to create the JWE Ciphertext value and the
+            JWE Authentication Tag (which is the Authentication Tag output
+            from the encryption operation).
+          </t>
+          <t>
+            Compute the encoded ciphertext value BASE64URL(JWE Ciphertext).
+          </t>
+          <t>
+            Compute the encoded Authentication Tag value BASE64URL(JWE
+            Authentication Tag).
+          </t>
+          <t>
+            Add the "iv", "tag" and "Ciphertext" attributes to the JSON headers
+            and let this be the encrypted package. (modified)
+          </t>
+        </list>
+      </t>
+    </section>
+    <section anchor="MessageDecryption" title="Message Decryption">
+      <t>
+        The message decryption process is the reverse of the encryption
+        process.  The order of the steps is not significant in cases where
+        there are no dependencies between the inputs and outputs of the
+        steps.  If any of these steps fail, the encrypted content cannot be
+        validated.
+      </t>
+      <t>
+        When there are multiple recipients, it is an application decision
+        which of the recipients' encrypted content must successfully validate
+        for the JEF to be accepted.  In some cases, encrypted content for all
+        recipients must successfully validate or the JEF will be considered
+        invalid.  In other cases, only the encrypted content for a single
+        recipient needs to be successfully validated.  However, in all cases,
+        the encrypted content for at least one recipient MUST successfully
+        validate or the JEF MUST be considered invalid.
+      </t>
+      <t>
+        Most steps are equal to the once in JWE, those that has been changed
+        are indicated so.
+      </t>
+      <t>
+        <list style="numbers">
+          <t>
+            Parse the JEF JSON structure. (modified)
+          </t>
+          <t>
+            Extract and remove JEF components JWE Initialization Vector ("iv"),
+            JWE Ciphertext ("ciphertext") and JWE Authentication Tag ("tag").
+            Let the remaining JOSN be the JWE Protected Header. (added)
+          </t>
+          <t>
+            Base64url decode the encoded representations of the JWE Encrypted
+            Key, the JWE Initialization Vector, the JWE Ciphertext, and the
+            JWE Authentication Tag, following the restriction that no line
+            breaks, whitespace, or other additional characters have been
+            used.  (modified)
+          </t>
+          <t>
+            Verify that the... (removed)
+          </t>
+          <t>
+            Let the JOSE Header be the union of the members of the JWE
+            Protected Header, and the corresponding JWE Per-Recipient Header.
+            During this step, verify that the resulting JOSE Header does not
+            contain duplicate Header Parameter names.  This restriction includes
+            that the same Header Parameter name also MUST NOT occur in distinct
+            JSON object values that together comprise the JOSE Header.
+            (modified)
+          </t>
+          <t>
+            Verify that the implementation understands and can process all
+            fields that it is required to support, whether required by this
+            specification, by the algorithms being used, or by the "crit"
+            Header Parameter value, and that the values of those parameters
+            are also understood and supported.
+          </t>
+          <t>
+            Determine the Key Management Mode employed by the algorithm
+            specified by the "alg" (algorithm) Header Parameter.
+          </t>
+          <t>
+            Verify that the JEF uses a key known to the recipient.
+          </t>
+          <t>
+            When Direct Key Agreement or Key Agreement with Key Wrapping are
+            employed, use the key agreement algorithm to compute the value
+            of the agreed upon key.  When Direct Key Agreement is employed,
+            let the CEK be the agreed upon key.  When Key Agreement with Key
+            Wrapping is employed, the agreed upon key will be used to
+            decrypt the JWE Encrypted Key.
+          </t>
+          <t>
+            When Key Wrapping, Key Encryption, or Key Agreement with Key
+            Wrapping are employed, decrypt the JWE Encrypted Key to produce
+            the CEK.  The CEK MUST have a length equal to that required for
+            the content encryption algorithm.  Note that when there are
+            multiple recipients, each recipient will only be able to decrypt
+            JWE Encrypted Key values that were encrypted to a key in that
+            recipient's possession.  It is therefore normal to only be able
+            to decrypt one of the per-recipient JWE Encrypted Key values to
+            obtain the CEK value.  Also, see JWE Section 11.5 for security
+            considerations on mitigating timing attacks.
+          </t>
+          <t>
+            When Direct Key Agreement or... (removed)
+          </t>
+          <t>
+            When Direct Encryption is employed, let the CEK be the shared
+            symmetric key.
+          </t>
+          <t>
+            Record whether the CEK could be successfully determined for this
+            recipient or not.
+          </t>
+          <t>
+            If the more than one recipient is addressed, repeat this process
+            (steps 4-12) for each recipient contained in the representation.
+          </t>
+          <t>
+            Serialize the JWE Protected Header according to instructions in
+            <xref target="Serialization" />. (modified)
+          </t>
+          <t>
+            Let the Additional Authenticated Data encryption parameter be
+            the serialized the JWE Protected Header. (modified)
+          </t>
+          <t>
+            Decrypt the JWE Ciphertext using the CEK, the JWE Initialization
+            Vector, the Additional Authenticated Data value, and the JWE
+            Authentication Tag (which is the Authentication Tag input to the
+            calculation) using the specified content encryption algorithm,
+            returning the decrypted plaintext and validating the JWE
+            Authentication Tag in the manner specified for the algorithm,
+            rejecting the input without emitting any decrypted output if the
+            JWE Authentication Tag is incorrect.
+          </t>
+          <t>
+            If a "zip" parameter was included, uncompress the decrypted
+            plaintext using the specified compression algorithm.
+          </t>
+          <t>
+            If there was no recipient for which all of the decryption steps
+            succeeded, then the JEF MUST be considered invalid.  Otherwise,
+            output the plaintext.  With multiple recipients, also
+            return a result to the application indicating for which of the
+            recipients the decryption succeeded and failed. (modified)
+          </t>
+          <t>
+            If packet needs to be verified later, put back the JWE
+            Initialization Vector ("iv"), JWE Ciphertext ("ciphertext") and
+            JWE Authentication Tag ("tag") into the JWE Protected Header.
+          </t>
+        </list>
+      </t>
+      <t>
+        Finally, note that it is an application decision which algorithms may
+        be used in a given context.  Even if a JEF can be successfully
+        decrypted, unless the algorithms used in the JWE are acceptable to
+        the application, it SHOULD consider the JEF to be invalid.
+      </t>
+    </section>
+    <section anchor="Serialization" title="Serialization">
+      <t>
+        When having headers in cleartext serialization of them needs to be
+        consistent across platforms. JSON <xref target="RFC8259" /> by it self does not produce
+        predictable serialization of data. However ES6 defines how to produce
+        JOSN that is predictable. By following the ES6 serialization directives
+        one get predictable results, i.e. the JOSN serializer MUST follow the
+        directives set out by ES6 when serializing data. Rules defined below
+        takes the essence from the ES6 specification and list what that means
+        in practical terms.
+      </t>
+      <t>
+        Rules for serialization of the signed object or object to be signed.
+        <list style="symbols">
+          <t>
+            The original property serialization order MUST be preserved as
+            described by ECMAScript section 9.1.12.
+          </t>
+          <t>
+            JSON data of the type "Number", MUST be processed according to
+            ECMAScript section 7.1.12.1.
+          </t>
+          <t>
+            Property names MUST NOT be empty ("").
+          </t>
+          <t>
+            Property names MUST be unique.
+          </t>
+          <t>
+            Whitespace must be removed which in practical terms means removal
+            of all characters outside of quoted strings having a value of x09,
+            x0a, x0d or x20.
+          </t>
+          <t>
+            JSON '\/' escape sequences within quoted strings must be treated as
+            "degenerate" equivalents to '/' by rewriting them.
+          </t>
+          <t>
+            Unicode escape sequences (\uhhhh) within quoted strings must be
+            adjusted as follows: If the Unicode value falls within the
+            tradditional ASCII control character range (0x00 - 0x1f), it must
+            be rewritten in lowercase hexadecimal notation unless it is one
+            of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
+            the latter have precedence. If the Unicode value is outside of
+            the ASCII control character range, it must be replaced by the
+            corresponding Unicode character. ECMAScript section 24.3.2.2.
+          </t>
+        </list>
+      </t>
+      <t>
+        When rules has been applied to the example encryption it looks like
+        this. The output string was folded for improving readability.
+        <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
+          <artwork>
+<![CDATA[
+{"enc":"A128CBC-HS256","alg":"ECDH-ES+A256KW","jwk":{"kty":"EC",
+"crv":"P-256","x":"_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
+"y":"5UEVUw9aIICGszcsg_Y1Uem7swqEe3RqgbzSJTpkwow"},
+"encrypted_key":"9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjXBqIqs9"}
+]]>
+          </artwork>
+        </figure>
+      </t>
+    </section>
+    <section anchor="ES6Interoperability" title="ES6+ Interoperability">
+      <t>
+        For JavaScript optimization reasons, ES6+'s JSON.parse() internally
+        rearranges order of properties with names expressed as integers, making a
+        parsed JSON string like '{"2":"a", "A":"b","1":"c"}' actually serialize as
+        '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST in
+        an here unspecified way, "emulate" this scheme since this behavior is not
+        intended to be an additional requirement to support by JSON tools in
+        general in order to use this specification.
+      </t>
+    </section>
+  </section>
+
+
+
+  <section anchor="IANA" title="IANA Considerations">
+    <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
+      <t>
+        This section registers "ciphertext", "encrypted_key" and "recipients"
+        header parameters in the "JSON Web Signature and Encryption Header
+        Parameters" registry in the manner described in <xref target="RFC7516"/>.
+      </t>
+      <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
+        <t>
+          <list style='symbols'>
+            <t>Header Parameter Name: <spanx style="verb">ciphertext</spanx></t>
+            <t>Header Parameter Description: The base64url-encoded ciphertext</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">JEF</spanx></t>
+            <t>Change Controller: IESG</t>
+            <t>Specification Document(s): [this document]</t>
+          </list>
+        </t>
+        <t>
+          <list style='symbols'>
+            <t>Header Parameter Name: <spanx style="verb">encrypted_key</spanx></t>
+            <t>Header Parameter Description: The base64url-encoded encrypted CEK</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">JEF</spanx></t>
+            <t>Change Controller: IESG</t>
+            <t>Specification Document(s): [this document]</t>
+          </list>
+        </t>
+        <t>
+          <list style='symbols'>
+            <t>Header Parameter Name: <spanx style="verb">recipients</spanx></t>
+            <t>Header Parameter Description: List of targeted recipients, each with a set of headers</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">JEF</spanx></t>
+            <t>Change Controller: IESG</t>
+            <t>Specification Document(s): [this document]</t>
+          </list>
+        </t>
+      </section>
+    </section>
+  </section>
+
+  <section anchor="Security" title="Security Considerations">
+    <t>
+      This specification does (to the author's knowledge), not introduce
+      additional vulnerabilities over what is specified for JWE
+      <xref target="RFC7516"/>.
+    </t>
+  </section>
+
+  <section anchor="Acknowledgements" title="Acknowledgements">
+    <t>
+      This document builds on the work done in JOSE WG so a big thanks goes out
+      to all involved in that work. It is specifically inspired by JWE so a
+      special thanks to the authors of that document, M. Jones, and
+      J. Hildebrand.
+    </t>
+  </section>
+ </middle>
+
+ <back>
+   <references title="Normative References">
+     <?rfc include='reference.RFC.2119'?>
+     <?rfc include='reference.RFC.8259'?>
+     <?rfc include='reference.RFC.7516'?>
+     <?rfc include='reference.RFC.7518'?>
+     <?rfc include='reference.RFC.8174'?>
+
+     <reference anchor="ES6" target="https://www.ecma-international.org/ecma-262/6.0/ECMA-262.pdf">
+       <front>
+         <title>ECMAScript 2015 Language Specification</title>
+         <author>
+           <organization>Ecma International</organization>
+         </author>
+         <date/>
+       </front>
+     </reference>
+   </references>
+
+   <section anchor="TestVectors" title="Test Vectors">
+     <t>
+       TBD
+     </t>
+   </section>
+ </back>
+</rfc>
