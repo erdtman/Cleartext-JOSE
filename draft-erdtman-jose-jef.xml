@@ -179,7 +179,7 @@
 {
   "enc": "A128CBC-HS256",
   "alg": "ECDH-ES+A256KW",
-  "jwk": {
+  "epk": {
     "kty": "EC",
     "crv": "P-256",
     "x": "_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
@@ -211,7 +211,7 @@
   "enc": "A128CBC-HS256",
   "alg": "ECDH-ES+A256KW",
   "recipients": [{
-    "jwk": {
+    "epk": {
       "kty": "EC",
       "crv": "P-256",
       "x": "_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
@@ -219,7 +219,7 @@
     },
     "encrypted_key": "9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjX"
   },{
-    "jwk": {
+    "epk": {
       "kty": "EC",
       "crv": "P-384",
       "x": "w24AEzLQkT66dkMGaS0ALdRVVV-qWkBY-MnvaE-X8tVfM_rKtCftPnWtj",
@@ -547,10 +547,11 @@
         <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
           <artwork>
 <![CDATA[
-{"enc":"A128CBC-HS256","alg":"ECDH-ES+A256KW","jwk":{"kty":"EC",
+{"enc":"A128CBC-HS256","alg":"ECDH-ES+A256KW","epk":{"kty":"EC",
 "crv":"P-256","x":"_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
 "y":"5UEVUw9aIICGszcsg_Y1Uem7swqEe3RqgbzSJTpkwow"},
-"encrypted_key":"9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjXBqIqs9"}
+"encrypted_key":"9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjXBqIqs9",
+"iv":"SgD79riBvQPjoRd1sV4Bjg"}
 ]]>
           </artwork>
         </figure>
