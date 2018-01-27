@@ -9,9 +9,9 @@ The need for this work stems from:
 
 - The primary target for the enhanced JWS and JWE schemes are information centric systems where the clear text approach simplifies documentation and debugging.
 
-- There are IETF standards in the workings which embed signed messages in an outer JSON object holding a "type indicator" for the embedded object.  Other standards efforts in progress combine an HTTP header featuring a detached JWS signature with an HTTP body holding JSON data in clear.  Using this proposal such workarounds wouldn't be necessary.
+- There is an IETF standard in the workings which embeds signed Base64Url-encoded messages in an outer JSON object holding a clear text "type indicator" for the embedded object.  Other standards efforts in progress combine an HTTP header featuring a detached signature with an HTTP body holding JSON data in clear.  Using this proposal such workarounds would no longer be necessary.
 
-- The connection to EcmaScript enables you to also sign JavaScript objects which for example can be used in Web pages.
+- The close tie to EcmaScript enables support for signing JavaScript objects which for example can be used in Web pages.
 
 Agenda
 - TBD
