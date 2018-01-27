@@ -9,6 +9,8 @@ The need for this work stems from:
 
 - The primary target for the enhanced JWS and JWE schemes are information centric systems where the clear text approach simplifies documentation and debugging.
 
+- There are currently IETF standards in the workings which embed signed messages in outer a JSON object holding an object "type indicator".  Using this proposal such workarounds wouldn't be necessary.
+
 - The connection to EcmaScript enables you to also sign JavaScript objects which for example can be used in Web pages.
 
 Agenda
