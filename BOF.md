@@ -3,7 +3,7 @@
 - Name: JSON Clear Text Signature and Encryption (JOSE-CT)
 - Description:
 The goal of this group is to standardize signature and encryption schemes combining the existing JWS and JWE standards with ECMA's JSON processing rules for EcmaScript (JavaScript).   By doing that, header data (like public keys and algorithms) as well as signed JSON data can be provided in clear text.<br>&nbsp;<br>
-Since the required EcmaScript support is already available in Internet browsers and Node.js, the proposed schemes will implementation-wise not have to start from zero.  JSON tools written in other languages will though usually require an upgrade.
+Since core support is already available (through EcmaScript's JSON object), in Internet browsers and Node.js, the proposed schemes will implementation-wise not have to start from zero.  JSON tools written in other languages will though usually require an upgrade.
 
 The need for this work stems from: 
 - JSON have effectively replaced XML for most new systems. Unlike XML signatures which requires quite complex (and thus error-prone) canonicalization, this proposal's reliance on EcmaScript JSON processing rules makes it straightforward offering similar functionality for JSON.
