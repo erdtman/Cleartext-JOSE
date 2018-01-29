@@ -10,10 +10,10 @@
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
 
-<rfc category="info" docName="draft-erdtman-jose-jcs-00" ipr="trust200902">
+<rfc category="info" docName="draft-erdtman-cleartext-jws-00" ipr="trust200902">
  <front>
-   <title abbrev="draft-erdtman-jose-jcs">
-     JSON Cleartext Signature (JCS)
+   <title abbrev="draft-erdtman-cleartext-jws">
+     Cleartext JSON Web Signature (JWS)
    </title>
 
    <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
@@ -40,11 +40,19 @@
      </address>
    </author>
 
+    <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
+      <organization abbrev="Microsoft">Microsoft</organization>
+      <address>
+        <email>mbj@microsoft.com</email>
+	<uri>http://self-issued.info/</uri>
+      </address>
+    </author>
+
    <date year="2018" />
 
    <area>Security</area>
 
-   <workgroup>Javascript Object Signing and Encryption</workgroup>
+   <workgroup>JSON Object Signing and Encryption (JOSE)</workgroup>
 
    <keyword>
      JOSE, Signing, Encryption, Cleartext
@@ -52,13 +60,16 @@
 
    <abstract>
      <t>
-       JCS is a scheme for signing data expressed as cleartext JSON
-       <xref target="RFC8259"/> objects, the signature is enveloped in the JSON
-       object to be signed. JCS builds on JWS <xref target="RFC7515"/>, JWA
-       <xref target="RFC7518"/> and JWK <xref target="RFC7517"/> for most
-       parts, e.g. headers, algorithms and key packaging. Serialization of the
-       JSON object to be signed depends on the introduction of predictable
-       Serialization in ECMAScript version 6 <xref target="ES6"/>.
+       Cleartext JSON Web Signature (JWS) represents signed data as cleartext JSON objects.
+       The signature is included in the JSON object to be signed.
+       Cleartext JWS builds on JWS <xref target="RFC7515"/>, JWA
+       <xref target="RFC7518"/> and JWK <xref target="RFC7517"/>,
+       including for representations of header parameters, algorithms, and cryptographic keys.
+       Serialization of the JSON object to be signed uses the predictable
+       serialization defined in ECMAScript version 6.
+       Cleartext JWS reuses data structures and semantics from JWS whenever practical and reasonable.
+       Cryptographic algorithms and identifiers used by this specification
+       are defined in the JSON Web Algorithms specification.
      </t>
    </abstract>
  </front>
@@ -66,31 +77,35 @@
 <middle>
   <section title="Introduction">
     <t>
-      JCS is a scheme for signing data expressed as cleartext JSON
-      objects, the signature is enveloped in the JSON object to be signed. By
-      enveloping the signature in the JSON object to be signed it is easy
-      inspect data in transit and when archived integrity can be guaranteed.
+      Cleartext JSON Web Signature (JWS) represents signed data as cleartext JSON <xref target="RFC8259"/> objects.
+      The signature is included in the JSON object to be signed.
+      By enveloping the signature in the JSON object to be signed, it is easy to
+      inspect data in transit and when archived, integrity can be guaranteed.
+      Cryptographic algorithms and identifiers used by this specification
+      are defined in the JSON Web Algorithms (JWA) <xref target="RFC7518" /> specification.
     </t>
     <t>
-      For most parts JCS reuses the constructs form JWS, JWA and JWK. Headers
-      form JWS, algorithms from JWA and the key structure form JWK. There are
-      two essential differences from JWS. First JCS signatures are enveloped in
-      the signed data. Secondly it depends on predictable JSON Serialization
-      instead of ASCII armoring the data to be signed.
+      Cleartext JWS reuses constructs from JWS, JWA, and JWK whenever practical and reasonable.
+      Header parameters from JWS, algorithms from JWA, and the key representation JWK are used.
+      There are two essential differences from JWS.
+      First, Cleartext JWS signatures are included in the signed data.
+      Second, Cleartext JWS depends on predictable JSON Serialization
+      rather than base64url encoding the data to be signed.
     </t>
     <t>
-      In the following example there are a few things to note. The signature is
-      embedded in the data. The attributes in the signature construct is the JWS
-      headers with one add-on, the 'value' attribute which contains the
-      base64url encoded signature bytes.
-      <figure align="center" anchor="fig:examplesignature" title='JCS signed example'>
+      In the following example, there are a few things to note.
+      The signature is included in the data.
+      The members in the <spanx style="verb">__cleartext_header_parameters</spanx> object are the JWS
+      header parameters.
+      The <spanx style="verb">__cleartext_signature</spanx> member contains the base64url encoded signature bytes.
+      <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
   	    <artwork>
 <![CDATA[
 {
   "iss":"joe",
   "exp":1300819380,
   "http://example.com/is_root":true,
-  "signature": {
+  "__cleartext_header_parameters": {
     "alg": "ES256",
     "jwk": {
       "kty": "EC",
@@ -98,12 +113,13 @@
       "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
       "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
     },
-    "val": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
+  "__cleartext_signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
   }
 }
 ]]>
         </artwork>
       </figure>
+      <!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
     </t>
   </section>
 
@@ -117,26 +133,25 @@
     </t>
   </section>
 
-  <section anchor="SignatureConstruct" title="The Signature Construct">
+  <section anchor="HeaderParameters" title="The __cleartext_header_parameters Member">
     <t>
-      The signature attribute that is added to the data is essentially the JWS
-      header, but with the additional attribute "val", which contains the
-      encoded signature value.
+      The <spanx style="verb">__cleartext_header_parameters</spanx> member that is added to the data contains the JWS
+      header parameters.
     </t>
     <t>
-      When putting the signature construct into the data to be signed it MUST
-      be put labeled with a the key "signature", i.e. the object to be signed
-      cannot have its own root item that is named "signature" (or "signatures").
+      When putting the header parameters into the data to be signed, they MUST
+      be labeled with the key <spanx style="verb">__cleartext_header_parameters</spanx>, i.e., the object to be signed
+      cannot have its own root item that is named <spanx style="verb">__cleartext_header_parameters</spanx>.
     </t>
-    <section anchor="SignatureConstructValueAttribute" title="The Value attribute">
+    <section anchor="SignatureValue" title="The __cleartext_signature Member">
       <t>
-        This specification registers the new JWS/JWE header "val". The value
-        of this attribute contains the base64url-encoded signature as a string.
+        This specification defines the new member <spanx style="verb">__cleartext_signature</spanx>. The value
+        of this member contains the base64url-encoded signature as a string.
       </t>
     </section>
   </section>
 
-  <section anchor="ProducingConsumingJCSs" title="Producing and Consuming JCSs">
+  <section anchor="ProducingConsumingCleartextJWSs" title="Producing and Consuming Cleartext JWSs">
     <section anchor="MessageSignatureMACComputation" title="Message Signature or MAC Computation">
       <t>
         To create a JSC, the following steps are performed.  The order of the
@@ -149,9 +164,9 @@
             Create the JSON object to be signed.
           </t>
           <t>
-            Create the signature object with the headers to be used and add it
-            as a top level attribute to the object to be signed with the key
-            "signature".
+            Create the <spanx style="verb">__cleartext_header_parameters</spanx> object with the header parameters to be used and add it
+            as a top-level member to the object to be signed with the key
+            <spanx style="verb">__cleartext_header_parameters</spanx>.
           </t>
           <t>
             Serialize the object to be signed using the Serialization and
@@ -159,35 +174,34 @@
             <xref target="Serializationnormalization" />
           </t>
           <t>
-            Compute the JSC Signature in the manner defined for the particular
-            algorithm being used over the Serialized object to be signed. The
-            "alg" (algorithm) Header Parameter MUST be present in the signatuer
-            construct, with the algorithm value accurately representing the
+            Compute the signature in the manner defined for the particular
+            algorithm being used over the serialized object to be signed. The
+            <spanx style="verb">alg</spanx> (algorithm) Header Parameter MUST be present in the <spanx style="verb">__cleartext_header_parameters</spanx>
+            member, with the algorithm value accurately representing the
             algorithm used to construct the JWS Signature.
           </t>
           <t>
-            Add the "val" attribute to the signature object with the encoded
-            JCS signature, BASE64URL(JSC Signature).
+            Add the <spanx style="verb">__cleartext_signature</spanx> member to the signature object with the encoded
+            Cleartext JWS signature, BASE64URL(JSC Signature).
           </t>
         </list>
       </t>
     </section>
     <section anchor="MessageSignatureMACValidation" title="Message Signature or MAC Validation">
       <t>
-        When validating a JCS, the following steps are performed.  The order
+        When validating a Cleartext JWS, the following steps are performed.  The order
         of the steps is not significant in cases where there are no
         dependencies between the inputs and outputs of the steps.  If any of
-        the listed steps fails, then the signature or MAC cannot be
-        validated.
+        the listed steps fails, then the input MUST be rejected.
       </t>
       <t>
-        When there are multiple JCS Signature values, it is an application
-        decision which of the JCS Signature values must successfully validate
-        for the JCS to be accepted.  In some cases, all must successfully
-        validate, or the JCS will be considered invalid.  In other cases,
-        only a specific JCS Signature value needs to be successfully
-        validated.  However, in all cases, at least one JCS Signature value
-        MUST successfully validate, or the JCS MUST be considered invalid.
+        When there are multiple Cleartext JWS Signature values, it is an application
+        decision which of the Cleartext JWS Signature values must successfully validate
+        for the Cleartext JWS to be accepted.  In some cases, all must successfully
+        validate, or the Cleartext JWS will be considered invalid.  In other cases,
+        only a specific Cleartext JWS Signature value needs to be successfully
+        validated.  However, in all cases, at least one Cleartext JWS Signature value
+        MUST successfully validate, or the Cleartext JWS MUST be considered invalid.
       </t>
       <t>
         <list style="numbers">
@@ -197,58 +211,58 @@
           <t>
             Verify that the implementation understands and can process all
             fields that it is required to support, whether required by this
-            specification, by the algorithm being used, or by the "crit"
+            specification, by the algorithm being used, or by the <spanx style="verb">crit</spanx>
             Header Parameter value, and that the values of those parameters
             are also understood and supported.
           </t>
           <t>
-            Save and remove "val" attribute from the signature object and
-            base64url-decode the encoded representation of the JCS Signature.
+            Save and remove the <spanx style="verb">__cleartext_signature</spanx> member from the signature object and
+            base64url-decode the encoded representation of the Cleartext JWS Signature.
           </t>
           <t>
-            Serialize and normalise the signed object including the signature
+            Serialize and normalize the signed object including the signature
             object, by following the rules in
             <xref target="Serializationnormalization" />.
           </t>
           <t>
-            Validate the JCS Signature against the JCS Signing Input, i.e. the
+            Validate the Cleartext JWS Signature against the Cleartext JWS Signing Input, i.e., the
             Serialized and Normalized data, in the manner defined for the
             algorithm being used, which MUST be accurately represented by the
-            value of the "alg" (algorithm) Header Parameter (parameter in
-            signature object), which MUST be present. Record whether the
+            value of the <spanx style="verb">alg</spanx> (algorithm) Header Parameter value,
+	    which MUST be present. Record whether the
             validation succeeded or not.
           </t>
           <t>
-            Return the a result indicating whether or not the JCS was
+            Return a result indicating whether or not the Cleartext JWS was
             successfully validated.
           </t>
           <t>
-            For later validation of the signed object put back the "val"
-            attribute in the signature.
+            For later validation of the signed object, put back the <spanx style="verb">__cleartext_signature</spanx>
+            member back into the JSON data structure.
           </t>
         </list>
       </t>
     </section>
     <section anchor="Serializationnormalization" title="Serialization and normalization">
       <t>
-        When having headers in cleartext serialization of them needs to be
-        consistent across platforms. JSON <xref target="RFC8259" /> by it self does not produce
-        predictable serialization of data. However ES6 defines how to produce
-        JOSN that is predictable. By following the ES6 serialization directives
-        one get predictable results, i.e. the JOSN serializer MUST follow the
-        directives set out by ES6 when serializing data. Rules defined below
-        takes the essence from the ES6 specification and list what that means
+        When having header parameters in cleartext serialization of them needs to be
+        consistent across platforms. JSON <xref target="RFC8259" /> by itself does not produce
+        predictable serialization of data. However, ES6 <xref target="ES6"/> defines how to produce
+        JSON that is predictable. By following the ES6 serialization directives,
+        one gets predictable results, i.e., the JSON serializer MUST follow the
+        directives set out by ES6 when serializing data. The rules defined below
+        take the essence from the ES6 specification and list what that means
         in practical terms.
       </t>
       <t>
-        Rules for serialization of the signed object or object to be signed.
+        Rules for serialization:
         <list style="symbols">
           <t>
             The original property serialization order MUST be preserved as
             described by ECMAScript section 9.1.12.
           </t>
           <t>
-            JSON data of the type "Number", MUST be processed according to
+            JSON data of the type <spanx style="verb">Number</spanx>, MUST be processed according to
             ECMAScript section 7.1.12.1.
           </t>
           <t>
@@ -261,6 +275,7 @@
             Whitespace must be removed which in practical terms means removal
             of all characters outside of quoted strings having a value of x09,
             x0a, x0d or x20.
+	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace? -->
           </t>
           <t>
             JSON '\/' escape sequences within quoted strings must be treated as
@@ -269,7 +284,7 @@
           <t>
             Unicode escape sequences (\uhhhh) within quoted strings must be
             adjusted as follows: If the Unicode value falls within the
-            tradditional ASCII control character range (0x00 - 0x1f), it must
+            traditional ASCII control character range (0x00-0x1f and 0x7f), it must
             be rewritten in lowercase hexadecimal notation unless it is one
             of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
             the latter have precedence. If the Unicode value is outside of
@@ -279,28 +294,31 @@
         </list>
       </t>
       <t>
-        When rules has been applied to the example signature it looks like this. The output
-        string was folded for improving readability.
+        When rules have been applied to the example signature it looks like this
+	(with line wraps within values for display purposes only):
+
         <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
           <artwork>
 <![CDATA[
 {"iss":"joe","exp":1300819380,"http://example.com/is_root":true,
-"signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
+"__cleartext_header_parameters":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
 "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aP
 j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
 ]]>
           </artwork>
         </figure>
+	<!-- TBD Include non-ASCII Unicode characters in the example, such as a UK Pound symbol and/or a Euro currency symbol -->
       </t>
       <section anchor="ES6Interoperability" title="ES6+ Interoperability">
         <t>
           For JavaScript optimization reasons, ES6+'s JSON.parse() internally
-          rearranges order of properties with names expressed as integers, making a
+          rearranges the order of properties with names expressed as integers, making a
           parsed JSON string like '{"2":"a", "A":"b","1":"c"}' actually serialize as
           '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST in
-          an here unspecified way, "emulate" this scheme since this behavior is not
+          a here unspecified way, "emulate" this scheme since this behavior is not
           intended to be an additional requirement to support by JSON tools in
           general in order to use this specification.
+	  Note:  This "unspecified" behavior MUST be specified for this spec to become actionable and interoperable!
         </t>
       </section>
     </section>
@@ -314,12 +332,12 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
         signatures but must also take the following in account as well:
         <list style="symbols">
           <t>
-            The "signature" property must be "signatures" and contain an array
+            The <spanx style="verb">__cleartext_signature</spanx> property must contain an array
             of signature constructs.
           </t>
           <t>
             Each signature requires its own normalization process. During this
-            process the other signature objects must (temporarily) be removed.
+            process, the other signature objects must (temporarily) be removed.
           </t>
         </list>
       </t>
@@ -330,31 +348,23 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
     <t>
       The scope of a signature, what is actually signed, comprises all
       properties including possible child objects of the JSON object holding
-      the signature property except for the "val" property in the signature
-      object.
+      the signature property except for the <spanx style="verb">__cleartext_signature</spanx> member.
+    </t>
+  </section>
+
+  <section anchor="NamingConventions" title="Naming Conventions">
+    <t>
+      JSON member names introduced by this specification that are to be
+      interspersed in application-defined JSON objects include the prefix
+      <spanx style="verb">__cleartext_</spanx> so as to avoid potential conflicts
+      with names used by applications.
     </t>
   </section>
 
   <section anchor="IANA" title="IANA Considerations">
-    <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
-      <t>
-        This section registers the "val" header parameter in the "JSON Web
-        Signature and Encryption Header Parameters" registry
-        in the manner described in <xref target="RFC7515"/>, which is used to
-        hold the signature value of the JCS.
-      </t>
-      <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
-        <t>
-          <list style='symbols'>
-            <t>Header Parameter Name: <spanx style="verb">value</spanx></t>
-            <t>Header Parameter Description: The base64url-encoded signature value.</t>
-            <t>Header Parameter Usage Location(s): <spanx style="verb">JCS</spanx></t>
-            <t>Change Controller: IESG</t>
-            <t>Specification Document(s): <xref target="SignatureConstructValueAttribute"/></t>
-          </list>
-        </t>
-      </section>
-    </section>
+    <t>
+      No IANA actions are needed by this specification.
+    </t>
   </section>
 
   <section anchor="Security" title="Security Considerations">
@@ -367,10 +377,10 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
 
   <section anchor="Acknowledgements" title="Acknowledgements">
     <t>
-      This document builds on the work done in JOSE WG so a big thanks goes out
-      to all involved in that work. It is specifically inspired by JWS so a
-      special thanks to the authors of that document, M. Jones, J. Bradley
-      and N. Sakimura.
+      This document builds on the work done in the JOSE WG so a big thanks goes out
+      to all involved in that work. It is specifically inspired by JWS, so a
+      special thanks to the authors of that document, Michael B. Jones, John Bradley,
+      and Nat Sakimura.
     </t>
   </section>
  </middle>
