@@ -11,7 +11,7 @@ The need for this work stems from:
 
 - There is an IETF standard in the works that embeds signed Base64Url-encoded messages in an outer JSON object holding a cleartext "type indicator" for the embedded object [?REFERENCE?].  Other standards efforts in progress combine an HTTP header featuring a detached signature with an HTTP body holding JSON data in clear [?REFERENCE].  Using cleartext JOSE, such workarounds would no longer be necessary.
 
-- The close tie with EcmaScript enables support for signing JavaScript objects, which for example, can be used in Web pages.
+- The close tie with EcmaScript also enables support for signing JavaScript objects, which for example, can be used in Web pages.
 
 Agenda
 - TBD
