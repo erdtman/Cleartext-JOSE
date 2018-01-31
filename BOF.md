@@ -21,3 +21,5 @@ Agenda
 References
 - [OTrP] https://tools.ietf.org/html/draft-pei-opentrustprotocol-05#section-8.2.1.1
 - [OPENBANKING] https://openbanking.atlassian.net/wiki/spaces/DZ/pages/5786479/Payment+Initiation+API+Specification+-+v1.1.0
+
+BoF proponents: Mike Jones (michael.jones@microsoft.com), Samuel Erdtman (samuel@erdtman.se), and Anders Rundgren(anders.rundgren.net@gmail.com)
