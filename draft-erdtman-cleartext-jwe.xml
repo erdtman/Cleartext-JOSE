@@ -232,8 +232,8 @@
     "epk": {
       "kty": "EC",
       "crv": "P-384",
-      "x": "w24AEzLQkT66dkMGaS0ALdRVVV-qWkBY-MnvaE-X8tVfM_rKtCftPnWtj",
-      "y": "pRguD1TD-p5CScIg1QgGgOy15BCSjzVmCcOWgR1wuMaCCop559kNz7d"
+      "x": "DEovk9Q6-wrqhJdvKMckyq-7-OXutKHKps2TJReDtGZcnDF6xFR2S6tYOx6hio7F",
+      "y": "JetBCPykRVagaEbICpwem2f5jezmgXKVTcs4N3w--WO3-PezfQdmA1ehjR46HRfW"
     },
     "encrypted_key": "D0r_Lnj_397CCPrK_gREltirxstOlt4qQgNC_mHy80c4ODr"
   }],
@@ -244,7 +244,6 @@
 ]]>
           </artwork>
         </figure>
-	<!-- TBD The x and y values above have different numbers of bytes, which is almost certainly wrong -->
 	<!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
       </t>
     </section>
