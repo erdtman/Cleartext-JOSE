@@ -16,18 +16,6 @@
      Cleartext JSON Web Encryption (JWE)
    </title>
 
-   <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
-     <organization>Independent</organization>
-     <address>
-       <postal>
-         <street></street>
-         <code></code> <city></city>
-         <country>France</country>
-       </postal>
-       <email>anders.rundgren.net@gmail.com</email>
-     </address>
-   </author>
-
    <author fullname="Samuel Erdtman" initials="S." surname="Erdtman">
      <organization>Spotify AB</organization>
      <address>
@@ -40,7 +28,19 @@
      </address>
    </author>
 
-    <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
+   <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
+     <organization>Independent</organization>
+     <address>
+       <postal>
+         <street></street>
+         <code></code> <city></city>
+         <country>France</country>
+       </postal>
+       <email>anders.rundgren.net@gmail.com</email>
+     </address>
+   </author>
+
+   <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
       <organization abbrev="Microsoft">Microsoft</organization>
       <address>
         <email>mbj@microsoft.com</email>
