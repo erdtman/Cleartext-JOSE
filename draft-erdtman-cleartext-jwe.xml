@@ -214,7 +214,7 @@
         the root and at the recipients level, then the recipients level has precedence.
 	<!-- TBD Rather than defining precedence, why not prohibit duplicate members across levels? -->
 
-        <figure align="center" anchor="fig:KeyEncryptionExamplewithonerecipient" title='Key Encryption Example with two recipients'>
+        <figure align="center" anchor="fig:KeyEncryptionExamplewithonerecipient" title='Key Encryption Example with Two Recipients'>
           <artwork>
 <![CDATA[
 {
