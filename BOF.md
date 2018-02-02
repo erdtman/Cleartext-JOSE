@@ -22,6 +22,8 @@ Responsible AD: Kathleen Moriarty (kathleen.moriarty.ietf@gmail.com)
 
 Length of session: 1h
 
+Number of people expected to attend: 100
+
 Conflicts to avoid: OAuth, ACE, SecEvent, TokBind
 
 Proposed Charter Text and Milestones (TBA)
