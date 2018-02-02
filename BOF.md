@@ -18,6 +18,14 @@ Agenda
 - Discussion
 - Question: Should the JOSE working group be reformed and the jose@ietf.org mailing list reused so existing expertise can be brought to bear?
 
+Responsible AD: Kathleen Moriarty (kathleen.moriarty.ietf@gmail.com)
+
+Length of session: 1h
+
+Conflicts to avoid: OAuth, ACE, SecEvent, TokBind
+
+Proposed Charter Text and Milestones (TBA)
+
 References
 - [OTrP] https://tools.ietf.org/html/draft-pei-opentrustprotocol-05#section-8.2.1.1
 - [OPENBANKING] https://openbanking.atlassian.net/wiki/spaces/DZ/pages/5786479/Payment+Initiation+API+Specification+-+v1.1.0
