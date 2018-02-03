@@ -157,7 +157,7 @@
     <section anchor="SingleRecipient" title="Single recipient">
       <t>
         For the simple case of Direct Encryption mode, parameters <spanx style="verb">alg</spanx>,
-        <spanx style="verb">encrypted_key</spanx> and <spanx style="verb">recipients</spanx> are not used <!-- TBD Why not use "alg":"dir" like JWE? -->
+        <spanx style="verb">encrypted_key</spanx> and <spanx style="verb">recipients</spanx> are not used
 	and <spanx style="verb">kid</spanx> refers to the CEK, if used.
 	<xref target="fig:DirectEncryptionExample"/> shows such an example.
         <figure align="center" anchor="fig:DirectEncryptionExample" title='Direct Encryption Example'>
@@ -165,6 +165,7 @@
 <![CDATA[
 {
   "enc": "A128CBC-HS256",
+  "alg": "dir",
   "kid": "secret-key"
   "iv": "SgD79riBvQPjoRd1sV4Bjg",
   "tag": "kBSE1sRUFqtRXT7iapqEqw",
