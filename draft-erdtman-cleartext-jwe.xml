@@ -89,7 +89,7 @@
     </t>
     <t>
       Why not build directly on the JWE JSON Format? In the original JWE format
-      all data that are to be protected needs to be 
+      all data that are to be protected needs to be
       base64url encoded, as a JSON format this becomes a contradiction in itself.
       In the JWE JSON format, base64url encoding only the parts that must be
       protected solves this (most of the data can then be JSON).  By serializing
@@ -588,12 +588,43 @@
     </section>
   </section>
 
-
-
   <section anchor="IANA" title="IANA Considerations">
-    <t>
-      No IANA actions are needed by this specification.
-    </t>
+    <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
+      <t>
+        This section registers "ciphertext", "encrypted_key" and "recipients"
+        header parameters in the "JSON Web Signature and Encryption Header
+        Parameters" registry in the manner described in <xref target="RFC7516"/>.
+      </t>
+      <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
+        <t>
+          <list style='symbols'>
+            <t>Header Parameter Name: <spanx style="verb">ciphertext</spanx></t>
+            <t>Header Parameter Description: The base64url-encoded ciphertext</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWE</spanx></t>
+            <t>Change Controller: IESG</t>
+            <t>Specification Document(s): [this document]</t>
+          </list>
+        </t>
+        <t>
+          <list style='symbols'>
+            <t>Header Parameter Name: <spanx style="verb">encrypted_key</spanx></t>
+            <t>Header Parameter Description: The base64url-encoded encrypted CEK</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWE</spanx></t>
+            <t>Change Controller: IESG</t>
+            <t>Specification Document(s): [this document]</t>
+          </list>
+        </t>
+        <t>
+          <list style='symbols'>
+            <t>Header Parameter Name: <spanx style="verb">recipients</spanx></t>
+            <t>Header Parameter Description: List of targeted recipients, each with a set of headers</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWE</spanx></t>
+            <t>Change Controller: IESG</t>
+            <t>Specification Document(s): [this document]</t>
+          </list>
+        </t>
+      </section>
+    </section>
   </section>
 
   <section anchor="Security" title="Security Considerations">

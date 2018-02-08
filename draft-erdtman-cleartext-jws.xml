@@ -133,20 +133,25 @@
     </t>
   </section>
 
-  <section anchor="HeaderParameters" title="The __cleartext_header_parameters Member">
+  <section anchor="HeaderParameters" title="The __cleartext_signature Member">
     <t>
-      The <spanx style="verb">__cleartext_header_parameters</spanx> member that is added to the data contains the JWS
-      header parameters.
+      The <spanx style="verb">__cleartext_signature</spanx> member that is added to the data contains the JWS
+      header parameters and the signature value.
     </t>
     <t>
       When putting the header parameters into the data to be signed, they MUST
-      be labeled with the key <spanx style="verb">__cleartext_header_parameters</spanx>, i.e., the object to be signed
-      cannot have its own root item that is named <spanx style="verb">__cleartext_header_parameters</spanx>.
+      be labeled with the key <spanx style="verb">__cleartext_signature</spanx>, i.e., the object to be signed
+      cannot have its own root item that is named <spanx style="verb">__cleartext_signature</spanx>.
     </t>
-    <section anchor="SignatureValue" title="The __cleartext_signature Member">
+    <section anchor="SignatureValue" title="The signature Member">
       <t>
-        This specification defines the new member <spanx style="verb">__cleartext_signature</spanx>. The value
+        This specification defines the new member <spanx style="verb">signature</spanx>. The value
         of this member contains the base64url-encoded signature as a string.
+      </t>
+    </section>
+    <section anchor="Signers" title="The signers Member">
+      <t>
+        TBD
       </t>
     </section>
   </section>
@@ -171,7 +176,7 @@
           <t>
             Serialize the object to be signed using the Serialization and
             normalization rules defined in
-            <xref target="Serializationnormalization" />
+            <xref target="Serialization" />
           </t>
           <t>
             Compute the signature in the manner defined for the particular
@@ -222,7 +227,7 @@
           <t>
             Serialize and normalize the signed object including the signature
             object, by following the rules in
-            <xref target="Serializationnormalization" />.
+            <xref target="Serialization" />.
           </t>
           <t>
             Validate the Cleartext JWS Signature against the Cleartext JWS Signing Input, i.e., the
@@ -243,7 +248,7 @@
         </list>
       </t>
     </section>
-    <section anchor="Serializationnormalization" title="Serialization and normalization">
+    <section anchor="Serialization" title="Serialization">
       <t>
         When having header parameters in cleartext serialization of them needs to be
         consistent across platforms. JSON <xref target="RFC8259" /> by itself does not produce
@@ -362,10 +367,34 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
   </section>
 
   <section anchor="IANA" title="IANA Considerations">
-    <t>
-      No IANA actions are needed by this specification.
-    </t>
-  </section>
+      <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
+        <t>
+          This section registers the <spanx style="verb">signature</spanx>
+          and <spanx style="verb">signers</spanx> header parameter in the "JSON Web
+          Signature and Encryption Header Parameters" registry
+          in the manner described in <xref target="RFC7515"/>, which is used to
+          hold the signature value of the JCS.
+        </t>
+        <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
+          <t>
+            <list style='symbols'>
+              <t>Header Parameter Name: <spanx style="verb">signature</spanx></t>
+              <t>Header Parameter Description: The base64url-encoded signature value.</t>
+              <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWS</spanx></t>
+              <t>Change Controller: IESG</t>
+              <t>Specification Document(s): <xref target="SignatureValue"/></t>
+            </list>
+            <list style='symbols'>
+              <t>Header Parameter Name: <spanx style="verb">signers</spanx></t>
+              <t>Header Parameter Description: List of signers, each with a set of headers and a signature.</t>
+              <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWS</spanx></t>
+              <t>Change Controller: IESG</t>
+              <t>Specification Document(s): <xref target="SignatureValue"/></t>
+            </list>
+          </t>
+        </section>
+      </section>
+    </section>
 
   <section anchor="Security" title="Security Considerations">
     <t>
