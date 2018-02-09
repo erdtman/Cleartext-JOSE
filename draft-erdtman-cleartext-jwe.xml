@@ -355,9 +355,9 @@
             Authentication Tag).
           </t>
           <t>
-            Add the <spanx style="verb">iv</spanx>, <spanx style="verb">tag</spanx> and <spanx style="verb">Ciphertext</spanx> members to the JSON header parameters
-            and let this be the encrypted package. (modified)
-	    <!-- TBD This step isn't at all clear.  Please make it more specific. -->
+            Finalize the encryption by adding the JWE Initialization Vector,
+            JWE Authentication Tag and JWE Ciphertext to the JSON
+            header parameters and let this be the encrypted package. (modified)
           </t>
         </list>
       </t>
@@ -571,7 +571,6 @@
 ]]>
           </artwork>
         </figure>
-	<!-- TBD Include non-ASCII Unicode characters in the example, such as a UK Pound symbol and/or a Euro currency symbol -->
       </t>
     </section>
     <section anchor="ES6Interoperability" title="ES6+ Interoperability">
