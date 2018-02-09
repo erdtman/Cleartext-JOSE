@@ -449,8 +449,8 @@
             considerations on mitigating timing attacks.
           </t>
           <t>
-            When Direct Key Agreement or... (removed)
-	    <!-- TBD This needs to either be clarified or removed entirely -->
+            When Direct Key Agreement or Direct Encryption are employed, verify
+            that the JWE Encrypted Key value is absent.
           </t>
           <t>
             When Direct Encryption is employed, let the CEK be the shared
