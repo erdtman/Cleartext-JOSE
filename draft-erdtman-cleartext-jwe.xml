@@ -211,9 +211,8 @@
         Encryption, Key Wrapping and Key Agreement with Key Wrapping. When
         addressing multiple recipients, the <spanx style="verb">recipients</spanx> array is used. The
         <spanx style="verb">recipients</spanx> array contains a list of objects containing needed header parameters
-        and an encrypted CEK (<spanx style="verb">encrypted_key</spanx>). If a header parameter is present in both
-        the root and at the recipients level, then the recipients level has precedence.
-	<!-- TBD Rather than defining precedence, why not prohibit duplicate members across levels? -->
+        and an encrypted CEK (<spanx style="verb">encrypted_key</spanx>). Header parameters MUST NOT be present at both
+        root and recipients level.
 
         <figure align="center" anchor="fig:KeyEncryptionExamplewithonerecipient" title='Key Encryption Example with Two Recipients'>
           <artwork>
