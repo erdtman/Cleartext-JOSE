@@ -10,9 +10,9 @@
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
 
-<rfc category="info" docName="draft-erdtman-cleartext-jwe-00" ipr="trust200902">
+<rfc category="info" docName="draft-erdtman-jose-cleartext-jwe-00" ipr="trust200902">
  <front>
-   <title abbrev="draft-erdtman-cleartext-jwe">
+   <title abbrev="draft-erdtman-jose-cleartext-jwe">
      Cleartext JSON Web Encryption (JWE)
    </title>
 
