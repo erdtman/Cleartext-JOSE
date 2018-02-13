@@ -95,9 +95,9 @@
     <t>
       In the following example, there are a few things to note.
       The signature is included in the data.
-      The members in the <spanx style="verb">__cleartext_header_parameters</spanx> object are the JWS
+      The members in the <spanx style="verb">__cleartext_signature</spanx> object are the JWS
       header parameters.
-      The <spanx style="verb">__cleartext_signature</spanx> member contains the base64url encoded signature bytes.
+      The <spanx style="verb">signature</spanx> member contains the base64url encoded signature bytes.
       <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
   	    <artwork>
 <![CDATA[
@@ -105,7 +105,7 @@
   "iss":"joe",
   "exp":1300819380,
   "http://example.com/is_root":true,
-  "__cleartext_header_parameters": {
+  "__cleartext_signature": {
     "alg": "ES256",
     "jwk": {
       "kty": "EC",
@@ -113,7 +113,7 @@
       "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
       "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
     },
-    "__cleartext_signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
+    "signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
   }
 }
 ]]>
@@ -169,9 +169,9 @@
             Create the JSON object to be signed.
           </t>
           <t>
-            Create the <spanx style="verb">__cleartext_header_parameters</spanx> object with the header parameters to be used and add it
+            Create the <spanx style="verb">__cleartext_signature</spanx> object with the header parameters to be used and add it
             as a top-level member to the object to be signed with the key
-            <spanx style="verb">__cleartext_header_parameters</spanx>.
+            <spanx style="verb">__cleartext_signature</spanx>.
           </t>
           <t>
             Serialize the object to be signed using the Serialization and
@@ -181,7 +181,7 @@
           <t>
             Compute the signature in the manner defined for the particular
             algorithm being used over the serialized object to be signed. The
-            <spanx style="verb">alg</spanx> (algorithm) Header Parameter MUST be present in the <spanx style="verb">__cleartext_header_parameters</spanx>
+            <spanx style="verb">alg</spanx> (algorithm) Header Parameter MUST be present in the <spanx style="verb">__cleartext_signature</spanx>
             member, with the algorithm value accurately representing the
             algorithm used to construct the JWS Signature.
           </t>
@@ -221,7 +221,7 @@
             are also understood and supported.
           </t>
           <t>
-            Save and remove the <spanx style="verb">__cleartext_signature</spanx> member from the signature object and
+            Save and remove the <spanx style="verb">signature</spanx> member from the signature object and
             base64url-decode the encoded representation of the Cleartext JWS Signature.
           </t>
           <t>
@@ -242,7 +242,7 @@
             successfully validated.
           </t>
           <t>
-            For later validation of the signed object, put back the <spanx style="verb">__cleartext_signature</spanx>
+            For later validation of the signed object, put back the <spanx style="verb">signature</spanx>
             member back into the JSON data structure.
           </t>
         </list>
@@ -306,7 +306,7 @@
           <artwork>
 <![CDATA[
 {"iss":"joe","exp":1300819380,"http://example.com/is_root":true,
-"__cleartext_header_parameters":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
+"__cleartext_signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
 "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aP
 j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
 ]]>
@@ -337,7 +337,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
         signatures but must also take the following in account as well:
         <list style="symbols">
           <t>
-            The <spanx style="verb">__cleartext_signature</spanx> property must contain an array
+            The <spanx style="verb">__cleartext_signatures</spanx> property must contain an array
             of signature constructs.
           </t>
           <t>
@@ -353,16 +353,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
     <t>
       The scope of a signature, what is actually signed, comprises all
       properties including possible child objects of the JSON object holding
-      the signature property except for the <spanx style="verb">__cleartext_signature</spanx> member.
-    </t>
-  </section>
-
-  <section anchor="NamingConventions" title="Naming Conventions">
-    <t>
-      JSON member names introduced by this specification that are to be
-      interspersed in application-defined JSON objects include the prefix
-      <spanx style="verb">__cleartext_</spanx> so as to avoid potential conflicts
-      with names used by applications.
+      the signature property except for the <spanx style="verb">signature</spanx> member.
     </t>
   </section>
 
