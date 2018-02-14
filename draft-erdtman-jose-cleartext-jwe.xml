@@ -380,8 +380,10 @@
         validate or the Cleartext JWE MUST be considered invalid.
       </t>
       <t>
-        Most steps are equivalent to the ones in JWE.
-	those that has been changed are indicated as such.
+        Most steps are equivalent to the ones in JWE. Those that has been 
+        changed or removed are indicated as such. This is a temporary solution
+        to make it easy to spot the difference between JWE and Cleartext JWE,
+        It will be removed in final version.
       </t>
       <t>
         <list style="numbers">
@@ -401,8 +403,7 @@
             used.  (modified)
           </t>
           <t>
-            Verify that the... (removed)
-	    <!-- TBD This needs to either be clarified or removed entirely -->
+            Verify that the... (removed, JWE step not needed for Cleartext JWE)
           </t>
           <t>
             Let the JOSE Header be the union of the members of the JWE
