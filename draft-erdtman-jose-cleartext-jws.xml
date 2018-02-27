@@ -99,7 +99,7 @@
       header parameters.
       The <spanx style="verb">signature</spanx> member contains the base64url encoded signature bytes.
       <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
-  	    <artwork>
+        <artwork>
 <![CDATA[
 {
   "iss":"joe",
@@ -113,7 +113,8 @@
       "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
       "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
     },
-    "signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7TKGK774XLTGwaCfUtd1VrscabQhmArCxA"
+    "signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7T
+                  KGK774XLTGwaCfUtd1VrscabQhmArCxA"
   }
 }
 ]]>
@@ -133,23 +134,27 @@
     </t>
   </section>
 
-  <section anchor="HeaderParameters" title="The __cleartext_signature Member">
+  <section anchor="SignatureObject" title="The Signature Object">
     <t>
-      The <spanx style="verb">__cleartext_signature</spanx> member that is added to the data contains the JWS
-      header parameters and the signature value.
+      When signing JSON data with Cleartext JWS a JSON object with the
+      JWS Header Parameters are created and placed within the JSON data to be
+      signed. In addition to the already defined JWS Header Parameters
+      Cleartext JWS defines two new Header Parameters <spanx style="verb">signature</spanx>
+      for the base64url encoded signature value and <spanx style="verb">signers</spanx>
+      to support multiple signers within the same signature object.
     </t>
     <t>
-      When putting the header parameters into the data to be signed, they MUST
-      be labeled with the key <spanx style="verb">__cleartext_signature</spanx>, i.e., the object to be signed
-      cannot have its own root item that is named <spanx style="verb">__cleartext_signature</spanx>.
+      The identifier for the Cleartext Signature Object in the JSON data to be
+      signed MUST be <spanx style="verb">__cleartext_signature</spanx>, unless
+      the application specifies that a different identifier is to be used.
     </t>
-    <section anchor="SignatureValue" title="The signature Member">
+    <section anchor="SignatureHeaderParameter" title="The signature Header Parameter">
       <t>
-        This specification defines the new member <spanx style="verb">signature</spanx>. The value
-        of this member contains the base64url-encoded signature as a string.
+        The <spanx style="verb">signature</spanx> Header Parameter contains the
+        base64url-encoded JWS Signature as a string.
       </t>
     </section>
-    <section anchor="Signers" title="The signers Member">
+    <section anchor="SignersHeaderParameter" title="The signers Header Parameter">
       <t>
         TBD
       </t>
@@ -159,7 +164,7 @@
   <section anchor="ProducingConsumingCleartextJWSs" title="Producing and Consuming Cleartext JWSs">
     <section anchor="MessageSignatureMACComputation" title="Message Signature or MAC Computation">
       <t>
-        To create a JSC, the following steps are performed.  The order of the
+        To create a Cleartext JWS, the following steps are performed.  The order of the
         steps is not significant in cases where there are no dependencies
         between the inputs and outputs of the steps.
       </t>
@@ -300,15 +305,14 @@
       </t>
       <t>
         When rules have been applied to the example signature it looks like this
-	(with line wraps within values for display purposes only):
-
+        (with line wraps within values for display purposes only):
         <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
           <artwork>
 <![CDATA[
 {"iss":"joe","exp":1300819380,"http://example.com/is_root":true,
-"__cleartext_signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256","x":
-"_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aP
-j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
+"__cleartext_signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256",
+"x":"_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aPj38T
+G4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
 ]]>
           </artwork>
         </figure>
@@ -363,8 +367,7 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
           This section registers the <spanx style="verb">signature</spanx>
           and <spanx style="verb">signers</spanx> header parameter in the "JSON Web
           Signature and Encryption Header Parameters" registry
-          in the manner described in <xref target="RFC7515"/>, which is used to
-          hold the signature value of the JCS.
+          in the manner described in <xref target="RFC7515"/>.
         </t>
         <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
           <t>
@@ -373,14 +376,14 @@ j38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
               <t>Header Parameter Description: The base64url-encoded signature value.</t>
               <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWS</spanx></t>
               <t>Change Controller: IESG</t>
-              <t>Specification Document(s): <xref target="SignatureValue"/></t>
+              <t>Specification Document(s): <xref target="SignatureHeaderParameter"/></t>
             </list>
             <list style='symbols'>
               <t>Header Parameter Name: <spanx style="verb">signers</spanx></t>
               <t>Header Parameter Description: List of signers, each with a set of headers and a signature.</t>
               <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWS</spanx></t>
               <t>Change Controller: IESG</t>
-              <t>Specification Document(s): <xref target="SignatureValue"/></t>
+              <t>Specification Document(s): <xref target="SignersHeaderParameter"/></t>
             </list>
           </t>
         </section>
