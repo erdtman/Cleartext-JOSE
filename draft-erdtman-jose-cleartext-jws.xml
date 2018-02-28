@@ -91,13 +91,37 @@
       First, Cleartext JWS signatures are included in the signed data.
       Second, Cleartext JWS depends on predictable JSON Serialization
       rather than base64url encoding the data to be signed.
-    </t>
+      The table below shows the primary characteristics of the JWS variants.
+      </t>
+      <texttable anchor="fig:table_jws_variants">
+        <ttcol align="left"></ttcol>
+        <ttcol align="left">JWS</ttcol>
+        <ttcol align="left">Cleartext JWS</ttcol>
+        <c>Data&#xa0;to&#xa0;be&#xa0;Signed</c>
+        <c>Any&#xa0;type and&#xa0;format</c>
+        <c>
+          Non-intrusive signature object
+          for inclusion in arbitrary JSON
+          and JavaScript objects
+        </c>
+        <c>Encoding&#xa0;of&#xa0;Signed&#xa0;Data</c>
+        <c>Base64Url</c>
+        <c>none</c>
+        <c>Encoding of Header Data</c>
+        <c>Base64Url</c>
+        <c>none</c>
+        <c>URL Friendly</c>
+        <c>Core&#xa0;feature</c>
+        <c>Out of scope</c>
+      </texttable>
     <t>
       In the following example, there are a few things to note.
       The signature is included in the data.
       The members in the <spanx style="verb">__cleartext_signature</spanx> object are the JWS
       header parameters.
       The <spanx style="verb">signature</spanx> member contains the base64url encoded signature bytes.
+      </t>
+    <t>
       <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
         <artwork>
 <![CDATA[{
@@ -111,10 +135,11 @@
     "signature": "pXP0GFHms0SntctNk1G1pHZfccVYdZkmAJktY_hpMsI
                   AckzX7wZJIJNlsBzmJ1_7LmKATiW-YHHZjsYdT96JZw"
   }
-}]]>
-        </artwork>
+}]]></artwork>
       </figure>
+        </t><t>
       The following private key in JWK <xref target="RFC7517"/> format can be used for verifying the sample signature.
+       </t><t>
       <figure align="center" anchor="fig:exampleverificationkey" title='Example signature verification key'>
         <artwork>
 <![CDATA[{
@@ -124,8 +149,7 @@
   "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
   "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY",
   "d": "nEsftLbi5u9pI8B0-drEjIuJzQgZie3yeqUR3BwWDl4"
-}]]>
-      </artwork>
+}]]></artwork>
     </figure>
     Note: Recreating the example signature using the example private key would normally generate a different &quot;signature&quot; value.
     </t>
@@ -318,8 +342,7 @@
 "numbers":[1e+30,4.5,6],"__cleartext_signature":
 {"alg":"ES256","kid":"example.com:p256"}}
 
-        Note: EUR denotes the Euro symbol.]]>
-          </artwork>
+        Note: EUR denotes the Euro symbol.]]></artwork>
         </figure>
       </t>
       <section anchor="ES6Interoperability" title="ES6+ Interoperability">
