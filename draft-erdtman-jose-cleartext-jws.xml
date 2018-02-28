@@ -102,19 +102,15 @@
         <artwork>
 <![CDATA[
 {
-  "iss":"joe",
-  "exp":1300819380,
-  "http://example.com/is_root":true,
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "ES256",
-    "jwk": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
-      "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
-    },
-    "signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7T
-                  KGK774XLTGwaCfUtd1VrscabQhmArCxA"
+    "kid": "example.com:p256",
+    "signature": "pXP0GFHms0SntctNk1G1pHZfccVYdZkmAJktY_hpMsIAckzX7wZJIJ
+                  NlsBzmJ1_7LmKATiW-YHHZjsYdT96JZw"
   }
 }
 ]]>
