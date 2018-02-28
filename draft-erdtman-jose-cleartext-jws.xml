@@ -304,12 +304,9 @@
         (with line wraps within values for display purposes only):
         <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
           <artwork>
-<![CDATA[
-{"iss":"joe","exp":1300819380,"http://example.com/is_root":true,
-"__cleartext_signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256",
-"x":"_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aPj38T
-G4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
-]]>
+{&quot;iss&quot;:&quot;joe&quot;,&quot;exp&quot;:1300819380,&quot;escapeMe&quot;:&quot;&#x20AC;$\u000f\nA'B\&quot;\\\\\&quot;/&quot;,
+&quot;numbers&quot;:[1e+30,4.5,6],&quot;__cleartext_signature&quot;:
+{&quot;alg&quot;:&quot;ES256&quot;,&quot;kid&quot;:&quot;example.com:p256&quot;}}
           </artwork>
         </figure>
 	<!-- TBD Include non-ASCII Unicode characters in the example, such as a UK Pound symbol and/or a Euro currency symbol -->
