@@ -100,8 +100,7 @@
       The <spanx style="verb">signature</spanx> member contains the base64url encoded signature bytes.
       <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
         <artwork>
-<![CDATA[
-{
+<![CDATA[{
   "iss": "joe",
   "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
@@ -109,14 +108,26 @@
   "__cleartext_signature": {
     "alg": "ES256",
     "kid": "example.com:p256",
-    "signature": "pXP0GFHms0SntctNk1G1pHZfccVYdZkmAJktY_hpMsIAckzX7wZJIJ
-                  NlsBzmJ1_7LmKATiW-YHHZjsYdT96JZw"
+    "signature": "pXP0GFHms0SntctNk1G1pHZfccVYdZkmAJktY_hpMsI
+                  AckzX7wZJIJNlsBzmJ1_7LmKATiW-YHHZjsYdT96JZw"
   }
-}
-]]>
+}]]>
         </artwork>
       </figure>
-      <!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
+      The following private key in JWK <xref target="RFC7517"/> format can be used for verifying the sample signature.
+      <figure align="center" anchor="fig:exampleverificationkey" title='Example signature verification key'>
+        <artwork>
+<![CDATA[{
+  "kid": "example.com:p256",
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+  "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY",
+  "d": "nEsftLbi5u9pI8B0-drEjIuJzQgZie3yeqUR3BwWDl4"
+}]]>
+      </artwork>
+    </figure>
+    Note: Recreating the example signature using the example private key would normally generate a different &quot;signature&quot; value.
     </t>
   </section>
 
@@ -272,16 +283,15 @@
             ECMAScript section 7.1.12.1.
           </t>
           <t>
-            Property names MUST NOT be empty ("").
-          </t>
-          <t>
             Property names MUST be unique.
           </t>
           <t>
             Whitespace must be removed which in practical terms means removal
             of all characters outside of quoted strings having a value of x09,
             x0a, x0d or x20.
-	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace? -->
+	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace?
+      
+           AR: AFAICT it is forbidden in JSON -->
           </t>
           <t>
             JSON '\/' escape sequences within quoted strings must be treated as
@@ -304,14 +314,13 @@
         (with line wraps within values for display purposes only):
         <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
           <artwork>
-<![CDATA[
-{"iss":"joe","exp":1300819380,"escapeMe":"EUR$\u000f\nA'B\"\\\\\"/",
+<![CDATA[{"iss":"joe","exp":1300819380,"escapeMe":"EUR$\u000f\nA'B\"\\\\\"/",
 "numbers":[1e+30,4.5,6],"__cleartext_signature":
 {"alg":"ES256","kid":"example.com:p256"}}
-]]>
+
+        Note: EUR denotes the Euro symbol.]]>
           </artwork>
         </figure>
-	Note: EUR denotes the Euro symbol.
       </t>
       <section anchor="ES6Interoperability" title="ES6+ Interoperability">
         <t>
@@ -398,7 +407,8 @@
       This document builds on the work done in the JOSE WG so a big thanks goes out
       to all involved in that work. It is specifically inspired by JWS, so a
       special thanks to the authors of that document, Michael B. Jones, John Bradley,
-      and Nat Sakimura.
+      and Nat Sakimura.  Building on ES6 number normalization was originally
+      proposed by James Manger.
     </t>
   </section>
  </middle>
