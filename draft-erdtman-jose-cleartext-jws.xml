@@ -93,7 +93,7 @@
       rather than base64url encoding the data to be signed.
       The table below shows the primary characteristics of the JWS variants.
       </t>
-      <texttable anchor="fig:table_jws_variants">
+      <texttable>
         <ttcol align="left"></ttcol>
         <ttcol align="left">JWS</ttcol>
         <ttcol align="left">Cleartext JWS</ttcol>
@@ -106,23 +106,23 @@
         </c>
         <c>Encoding&#xa0;of&#xa0;Signed&#xa0;Data</c>
         <c>Base64Url</c>
-        <c>none</c>
-        <c>Encoding of Header Data</c>
+        <c>None</c>
+        <c>Encoding&#xa0;of&#xa0;Header&#xa0;Data</c>
         <c>Base64Url</c>
-        <c>none</c>
+        <c>None</c>
         <c>URL Friendly</c>
         <c>Core&#xa0;feature</c>
         <c>Out of scope</c>
       </texttable>
     <t>
       In the following example, there are a few things to note.
-      The signature is included in the data.
+      The signature is included in the data (aka enveloped signature).
       The members in the <spanx style="verb">__cleartext_signature</spanx> object are the JWS
       header parameters.
       The <spanx style="verb">signature</spanx> member contains the base64url encoded signature bytes.
       </t>
     <t>
-      <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
+      <figure align="center">
         <artwork>
 <![CDATA[{
   "iss": "joe",
@@ -137,10 +137,12 @@
   }
 }]]></artwork>
       </figure>
-        </t><t>
+      </t>
+      <t>Note that the <spanx style="verb">signature</spanx> value was cut in two to cope with RFC line length constraints.</t>
+    <t>
       The following private key in JWK <xref target="RFC7517"/> format can be used for verifying the example signature.
        </t><t>
-      <figure align="center" anchor="fig:exampleverificationkey" title='Example signature verification key'>
+      <figure align="center">
         <artwork>
 <![CDATA[{
   "kid": "example.com:p256",
@@ -152,8 +154,9 @@
 }]]></artwork>
     </figure>
          </t><t>
-    Note: Recreating the example signature using the example private key would normally (using a non-deterministic ECDSA implementation),
-    generate a different <spanx style="verb">signature</spanx> value.
+    Note: Recreating the example signature using the example private key would normally
+    result in a different <spanx style="verb">signature</spanx> value
+    since ECDSA relies on random data for signature generation.
     </t>
   </section>
 
@@ -188,13 +191,13 @@
       the signature property except for the <spanx style="verb">signature</spanx> member.
     </t>
   </section>
-    <section anchor="SignatureHeaderParameter" title="The signature Header Parameter">
+    <section anchor="SignatureHeaderParameter" title="The &quot;signature&quot; Header Parameter">
       <t>
         The <spanx style="verb">signature</spanx> Header Parameter contains the
         base64url-encoded JWS Signature as a string.
       </t>
     </section>
-    <section anchor="SignersHeaderParameter" title="The signers Header Parameter">
+    <section anchor="SignersHeaderParameter" title="The &quot;signers&quot; Header Parameter">
       <t>
         TBD
       </t>
@@ -447,7 +450,7 @@
 
   <section anchor="Security" title="Security Considerations">
     <t>
-      This specification does (to the author's knowledge), not introduce
+      This specification does (to the authors' knowledge), not introduce
       additional vulnerabilities over what is specified for JWS
       <xref target="RFC7515"/>.
     </t>
@@ -458,8 +461,11 @@
       This document builds on the work done in the JOSE WG so a big thanks goes out
       to all involved in that work. It is specifically inspired by JWS, so a
       special thanks to the authors of that document, Michael B. Jones, John Bradley,
-      and Nat Sakimura.  Building on ES6 number normalization was originally
-      proposed by James Manger.
+      and Nat Sakimura.
+      </t><t>
+      Building on ES6 number normalization was originally
+      proposed by James Manger. This ultimately led to
+      the adoption of the entire ES6 JSON processing model.
     </t>
   </section>
  </middle>
