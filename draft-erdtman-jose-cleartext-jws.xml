@@ -16,18 +16,6 @@
      Cleartext JSON Web Signature (JWS)
    </title>
 
-   <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
-     <organization>Independent</organization>
-     <address>
-       <postal>
-         <street></street>
-         <code></code> <city></city>
-         <country>France</country>
-       </postal>
-       <email>anders.rundgren.net@gmail.com</email>
-     </address>
-   </author>
-
    <author fullname="Samuel Erdtman" initials="S." surname="Erdtman">
      <organization>Spotify AB</organization>
      <address>
@@ -40,7 +28,19 @@
      </address>
    </author>
 
-    <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
+   <author fullname="Anders Rundgren" initials="A." surname="Rundgren">
+     <organization>Independent</organization>
+     <address>
+       <postal>
+         <street></street>
+         <code></code> <city>Montpellier</city>
+         <country>France</country>
+       </postal>
+       <email>anders.rundgren.net@gmail.com</email>
+     </address>
+   </author>
+
+   <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
       <organization abbrev="Microsoft">Microsoft</organization>
       <address>
         <email>mbj@microsoft.com</email>
@@ -91,36 +91,69 @@
       First, Cleartext JWS signatures are included in the signed data.
       Second, Cleartext JWS depends on predictable JSON Serialization
       rather than base64url encoding the data to be signed.
-    </t>
+      The table below shows the primary characteristics of the JWS variants.
+      </t>
+      <texttable anchor="fig:table_jws_variants">
+        <ttcol align="left"></ttcol>
+        <ttcol align="left">JWS</ttcol>
+        <ttcol align="left">Cleartext JWS</ttcol>
+        <c>Data&#xa0;to&#xa0;be&#xa0;Signed</c>
+        <c>Any&#xa0;type and&#xa0;format</c>
+        <c>
+          Non-intrusive signature object
+          for inclusion in arbitrary JSON
+          and JavaScript objects
+        </c>
+        <c>Encoding&#xa0;of&#xa0;Signed&#xa0;Data</c>
+        <c>Base64Url</c>
+        <c>none</c>
+        <c>Encoding of Header Data</c>
+        <c>Base64Url</c>
+        <c>none</c>
+        <c>URL Friendly</c>
+        <c>Core&#xa0;feature</c>
+        <c>Out of scope</c>
+      </texttable>
     <t>
       In the following example, there are a few things to note.
       The signature is included in the data.
       The members in the <spanx style="verb">__cleartext_signature</spanx> object are the JWS
       header parameters.
       The <spanx style="verb">signature</spanx> member contains the base64url encoded signature bytes.
+      </t>
+    <t>
       <figure align="center" anchor="fig:examplesignature" title='Cleartext JWS signed example'>
         <artwork>
-<![CDATA[
-{
-  "iss":"joe",
-  "exp":1300819380,
-  "http://example.com/is_root":true,
+<![CDATA[{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
   "__cleartext_signature": {
     "alg": "ES256",
-    "jwk": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU",
-      "y": "bdfJGraBVL5aPj38TG4tHwxpU2VKwG1XBp0wQfCLOFQ"
-    },
-    "signature": "aRx2MQyCGVOZGViAC_7bEDUp8_CGO1kU1l7Lvp1FHx4qBiPkGs9Z7T
-                  KGK774XLTGwaCfUtd1VrscabQhmArCxA"
+    "kid": "example.com:p256",
+    "signature": "pXP0GFHms0SntctNk1G1pHZfccVYdZkmAJktY_hpMsI
+                  AckzX7wZJIJNlsBzmJ1_7LmKATiW-YHHZjsYdT96JZw"
   }
-}
-]]>
-        </artwork>
+}]]></artwork>
       </figure>
-      <!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
+        </t><t>
+      The following private key in JWK <xref target="RFC7517"/> format can be used for verifying the example signature.
+       </t><t>
+      <figure align="center" anchor="fig:exampleverificationkey" title='Example signature verification key'>
+        <artwork>
+<![CDATA[{
+  "kid": "example.com:p256",
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+  "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY",
+  "d": "nEsftLbi5u9pI8B0-drEjIuJzQgZie3yeqUR3BwWDl4"
+}]]></artwork>
+    </figure>
+         </t><t>
+    Note: Recreating the example signature using the example private key would normally (using a non-deterministic ECDSA implementation),
+    generate a different <spanx style="verb">signature</spanx> value.
     </t>
   </section>
 
@@ -148,6 +181,13 @@
       signed MUST be <spanx style="verb">__cleartext_signature</spanx>, unless
       the application specifies that a different identifier is to be used.
     </t>
+  <section anchor="SignatureScope" title="Signature Scope">
+    <t>
+      The scope of a signature, what is actually signed, comprises all
+      properties including possible child objects of the JSON object holding
+      the signature property except for the <spanx style="verb">signature</spanx> member.
+    </t>
+  </section>
     <section anchor="SignatureHeaderParameter" title="The signature Header Parameter">
       <t>
         The <spanx style="verb">signature</spanx> Header Parameter contains the
@@ -181,18 +221,18 @@
           <t>
             Serialize the object to be signed using the Serialization and
             normalization rules defined in
-            <xref target="Serialization" />
+            <xref target="Serialization" />.
           </t>
           <t>
-            Compute the signature in the manner defined for the particular
+            Compute the JWS Signature in the manner defined for the particular
             algorithm being used over the serialized object to be signed. The
             <spanx style="verb">alg</spanx> (algorithm) Header Parameter MUST be present in the <spanx style="verb">__cleartext_signature</spanx>
             member, with the algorithm value accurately representing the
             algorithm used to construct the JWS Signature.
           </t>
           <t>
-            Add the <spanx style="verb">__cleartext_signature</spanx> member to the signature object with the encoded
-            Cleartext JWS signature, BASE64URL(JSC Signature).
+            Add the <spanx style="verb">signature</spanx> member to the signature object with the encoded
+            Cleartext JWS signature and assign it the string value BASE64URL(JWS Signature).
           </t>
         </list>
       </t>
@@ -276,16 +316,15 @@
             ECMAScript section 7.1.12.1.
           </t>
           <t>
-            Property names MUST NOT be empty ("").
-          </t>
-          <t>
             Property names MUST be unique.
           </t>
           <t>
             Whitespace must be removed which in practical terms means removal
             of all characters outside of quoted strings having a value of x09,
             x0a, x0d or x20.
-	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace? -->
+	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace?
+      
+           AR: AFAICT it is forbidden in JSON -->
           </t>
           <t>
             JSON '\/' escape sequences within quoted strings must be treated as
@@ -299,35 +338,59 @@
             of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
             the latter have precedence. If the Unicode value is outside of
             the ASCII control character range, it must be replaced by the
-            corresponding Unicode character. ECMAScript section 24.3.2.2.
+            corresponding Unicode character. See ECMAScript section 24.3.2.2.
           </t>
         </list>
       </t>
       <t>
-        When rules have been applied to the example signature it looks like this
+        When rules have been applied to the example signature it should look like this
         (with line wraps within values for display purposes only):
-        <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
+        </t>
+      <t>
+        <figure align="center">
           <artwork>
-<![CDATA[
-{"iss":"joe","exp":1300819380,"http://example.com/is_root":true,
-"__cleartext_signature":{"alg":"ES256","jwk":{"kty":"EC","crv":"P-256",
-"x":"_gow8fcS3Dx9z6j57U5q8tunnRBdrgLU9A7CZTYCnqU","y":"bdfJGraBVL5aPj38T
-G4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
-]]>
-          </artwork>
+<![CDATA[{"iss":"joe","exp":1300819380,"escapeMe":"EUR$\u000f\nA'B\"\\\\\"/",
+"numbers":[1e+30,4.5,6],"__cleartext_signature":
+{"alg":"ES256","kid":"example.com:p256"}}]]></artwork>
         </figure>
-	<!-- TBD Include non-ASCII Unicode characters in the example, such as a UK Pound symbol and/or a Euro currency symbol -->
+      </t>
+      <t>Note: EUR denotes the Euro symbol.</t>
+      <t>
+        The final step is converting the textual output into an UTF-8 formatted array.
+        Applied to the sample this should yield the following bytes here shown in decimal notation:
+        </t>
+      <t>
+           123, 34, 105, 115, 115, 34, 58, 34, 106,
+          111, 101, 34, 44, 34, 101, 120, 112, 34,
+          58, 49, 51, 48, 48, 56, 49, 57, 51,
+          56, 48, 44, 34, 101, 115, 99, 97, 112,
+          101, 77, 101, 34, 58, 34, 226, 130, 172,
+          36, 92, 117, 48, 48, 48, 102, 92, 110,
+          65, 39, 66, 92, 34, 92, 92, 92, 92,
+          92, 34, 47, 34, 44, 34, 110, 117, 109,
+          98, 101, 114, 115, 34, 58, 91, 49, 101,
+          43, 51, 48, 44, 52, 46, 53, 44, 54,
+          93, 44, 34, 95, 95, 99, 108, 101, 97,
+          114, 116, 101, 120, 116, 95, 115, 105, 103,
+          110, 97, 116, 117, 114, 101, 34, 58, 123,
+          34, 97, 108, 103, 34, 58, 34, 69, 83,
+          50, 53, 54, 34, 44, 34, 107, 105, 100,
+          34, 58, 34, 101, 120, 97, 109, 112, 108,
+          101, 46, 99, 111, 109, 58, 112, 50, 53,
+          54, 34, 125, 125
       </t>
       <section anchor="ES6Interoperability" title="ES6+ Interoperability">
         <t>
           For JavaScript optimization reasons, ES6+'s JSON.parse() internally
           rearranges the order of properties with names expressed as integers, making a
           parsed JSON string like '{"2":"a", "A":"b","1":"c"}' actually serialize as
-          '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST in
-          a here unspecified way, "emulate" this scheme since this behavior is not
+          '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST
+          "emulate" this scheme since this behavior is not
           intended to be an additional requirement to support by JSON tools in
-          general in order to use this specification.
-	  Note:  This "unspecified" behavior MUST be specified for this spec to become actionable and interoperable!
+          general in order to use this specification.   The easiest way
+          accomplishing this is to programmatically make sure that possible
+          numeric property names always are created first and added in ascending
+          order.
         </t>
       </section>
     </section>
@@ -351,14 +414,6 @@ G4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
         </list>
       </t>
     </section>
-  </section>
-
-  <section anchor="SignatureScope" title="Signature Scope">
-    <t>
-      The scope of a signature, what is actually signed, comprises all
-      properties including possible child objects of the JSON object holding
-      the signature property except for the <spanx style="verb">signature</spanx> member.
-    </t>
   </section>
 
   <section anchor="IANA" title="IANA Considerations">
@@ -403,7 +458,8 @@ G4tHwxpU2VKwG1XBp0wQfCLOFQ"}}}
       This document builds on the work done in the JOSE WG so a big thanks goes out
       to all involved in that work. It is specifically inspired by JWS, so a
       special thanks to the authors of that document, Michael B. Jones, John Bradley,
-      and Nat Sakimura.
+      and Nat Sakimura.  Building on ES6 number normalization was originally
+      proposed by James Manger.
     </t>
   </section>
  </middle>
