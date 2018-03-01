@@ -75,7 +75,7 @@
  </front>
 
 <middle>
-  <section title="Introduction">
+  <section anchor="Introduction" title="Introduction">
     <t>
       Cleartext JSON Web Signature (JWS) represents signed data as cleartext JSON <xref target="RFC8259"/> objects.
       The signature is included in the JSON object to be signed.
@@ -199,7 +199,8 @@
     </section>
     <section anchor="SignersHeaderParameter" title="The &quot;signers&quot; Header Parameter">
       <t>
-        TBD
+        The optional <spanx style="verb">signers</spanx> Header Parameter contains an
+        array of signatures.  See <xref target="MultipleSignatures" />.
       </t>
     </section>
   </section>
@@ -407,15 +408,110 @@
         signatures but must also take the following in account as well:
         <list style="symbols">
           <t>
-            The <spanx style="verb">__cleartext_signatures</spanx> property must contain an array
+            There MUST be an additional Cleartext JWS Header parameter <spanx style="verb">signers</spanx>, holding an array
             of signature constructs.
           </t>
           <t>
             Each signature requires its own normalization process. During this
-            process, the other signature objects must (temporarily) be removed.
+            process, the other signature constructs MUST (temporarily) be removed.
           </t>
-        </list>
+          <t>
+            The normalized data MUST include the array brackets ([]) but MUST NOT
+            include the comma separating the signature constructs.
+          </t>
+          <t>
+            A signature construct is equivalent to an ordinary Cleartext JWS object,
+            but MAY exclude the <spanx style="verb">alg</spanx> Header parameter which then
+            MUST be declared in the Cleartext JWS object itself.  Using the latter arrangement,
+            all enclosed signature constructs MUST use the same algorithm as well as not
+            specifying the <spanx style="verb">alg</spanx> Header parameter.
+            See <xref target="multipleglobalalg"/> for an example.
+          </t>
+          <t>
+            If a <spanx style="verb">crit</spanx> Header parameter is specified in
+            the Cleartext JWS object itself, this declaration MUST be applied to
+            all signature constructs. Such a declaration MUST NOT be combined
+            with <spanx style="verb">crit</spanx> Header parameters in
+            the enclosed signature constructs.
+            See <xref target="multipleglobalcrit"/> for an example.
+          </t>
+      </list>
       </t>
+      <t>
+        The following example shows a multiply signed object:
+      </t>
+      <t>
+        <figure align="center">
+          <artwork>
+<![CDATA[{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "signers": [{
+      "alg": "ES256",
+      "kid": "example.com:p256",
+      "signature": "83gr5rmjKgngLTaPpxuQWiZaQmlQ555jLHNcZLmcBpg
+                    X7JZLeqrNhIrQRg3jTsNwh1RuibDYBzCsaxVUkhGEKg"
+    },{
+      "alg": "RS256",
+      "kid": "example.com:r2048",
+      "signature": "PVQeL8XtjnetambQe98FuMBDuijwWTIFXouyNjL8WX0
+                    WvamWkHjv34Iz8VOHHWr9w8t14FXJJuQ22j-h5BR7qP
+                    xE7cBVS8XSltR7VvcNidfn-r-TtAVwDwn7Iz_Gk-RI7
+                    QIv4ctbreYt1myG64Ikw38OEmNURCxzf9h9w3tvA3R8
+                    ZE3MYgELFaQRowSW92JC1HhGZRijzHoIzvH6l_GULP_
+                    hf7kggwFNtRrzN8DLXbhBhGaoP-O0cNZsCWY2hbNU6L
+                    7km6bdrqHdq88DSOEGg_-5T6qUsIAYbmCgUK7XBi2q-
+                    DRPQZYnxr5570mj9Nkh0hpZ-VfAC2ftbzxFAB7ZYg"
+    }]
+  }
+}]]></artwork>
+        </figure>
+    </t>
+      <t>
+        The ECDSA signature can be validated using the JWK specified in <xref target="Introduction"/>,
+      while the RSA signature can be validated using the following JWK:
+      </t>
+      <t>
+     <figure align="center">
+        <artwork>
+<![CDATA[{
+  "kid": "example.com:r2048",
+  "kty": "RSA",
+  "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3
+        tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHx
+        klZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-
+        uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8b
+        ozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9i
+        ak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+  "e": "AQAB",
+  "d": "Q6iBYpnIrB2mkQZagP1lZuvBv9_osVaSZpLRvKD7DxhvbDTs0coaTJIoVCSB1
+        _VZip8zlUg-TnYWF1Liv9VSwfQ7ddxrcOUtej60mId0ntNz2HhbxJsWjiru8E
+        ZoArl0nEovLDNxlRgRMEyZwOKPC_xHT6nFrk7_s9pR5pEEcubGLAVBKnLCoPd
+        Lr-CBjCvWfJo73W5AZxoSb8MdWQOi5viXHURpr1Y_uBRsMuclovM56Vt05etM
+        sB1AbcTLUDwAuYrZWa1c08ql60ft7b3v6Q_rCL7EHtFU3PHAuP0mV7tM5BfAP
+        f4T0g9pbr4GOw7eqQCiYgPFE7gmCR_PDxv5YQ",
+  "p": "6DIM343hAtj1hQprJaVQ3T8YeIytIQ7Ma544C0A8BX-irjJfARy4fAlTSyBFe
+        auZ0WdbMGtKpAIgNVmfCfuP7W1bXw7UaxpqsQlbw54K1VtBs8xG-lee_2YQ3l
+        UlIiC1at6L0jxWYNkvp-LIfU2F5ZQir5ZWVXwgdMcgoNBABMc",
+  "q": "keacq0goV7pAtG2h33OAk-XOSclIF1agvEMMOKuud5V-vGQ6OaYldlYqZmSGg
+        F7RVlX0GZO70nPqatjd2G-tI8wEq5K_xmLQurUPFW8g___z0CTgJ62KbjFxCt
+        Gny5rsObX9im6cCc_EOtWZRaApzO8ykxfo1QcEjT4k1na7DzE",
+  "dp": "nPmJPnFal2Q5x_GdMlwq6QhI8OaZ_OlWRcM3PFP2v_jj8ERZehUCm8hqKTXu
+         Ai2C1dC8E2XVlj9hqu-l10fcq7Tsurz52laHnpwnD35-8HK7XmRR79jgwuUr
+         rkN90S6vt0ow2La15s-tqiBlTmDkjqqxMGfAghZiktA0PMPNI-0",
+  "dq": "D3c1lkZw2FPK9hVE-m3A7GyIwHOQq8CoCyzER-GS_eQf6hJpxaCiCfg6SF5R
+         j5v9brxvwqJRX46gA7F3WrED1m6S9Cj7ISlqXNBCiBAenGRiUOcHx8zyhpnB
+         FNeChOeoMLnk5V6yNawLbf0kYSgIJkwYvVTkfmhfCCXVO9KcI5E",
+  "qi": "wV0NzfCakfog1NFjtPzcga1MtkpizgPkxcP9LjNdvXW2YQZhM6GIEGjsu3iv
+         TrHrrM-4_bTQHOoTtfIY7wdqBKlwQTJOI0dH9FbNJ4ecGojRwgv83TN8aNKh
+         17Tt44jI5oibs2P-31B_VW9R1wwhnnOuCYpABfoSbtHIoCRme5I"
+}]]></artwork>
+    </figure>
+      </t>
+      <t>Note that the parameters were sliced in order to cope with RFC line length constraints.</t>
     </section>
   </section>
 
@@ -491,9 +587,93 @@
    </references>
 
    <section anchor="TestVectors" title="Test Vectors">
+     <t>This section contains a set of test vectors sharing a common characteristic,
+     long lines are sliced in order to cope with RFC line length constraints.</t>
+   <section anchor="multipleglobalalg" title="Multiple Signature with Global &quot;alg&quot; Header">
      <t>
-       TBD
+     <figure align="center">
+        <artwork>
+<![CDATA[{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "alg": "ES512",
+    "signers": [{
+      "kid": "example.com:p256",
+      "signature": "zjf2MzEesdIudTk0k9osa0um5ffzU-oM_8Z-mKHFmZxCRvpl4
+                    1lX2KUt5a742px_cTsG7sw-Kh8_xJuUMX97Kg"
+    },{
+      "kid": "example.com:p384",
+      "signature": "jTWnzmAcC34zOpTvvg7vuqLECUOqS6UMQcjwM24w7DwHz7nXQ
+                    e17eFYTjJWE-w_Nnw3sosYM6c6J9ABFOGoKx70cRPNQQ8WHfT
+                    zAyfTBxMBWtUR5PKWi5hJWUDeMnRS0"
+    }]
+  }
+}]]></artwork>
+    </figure>
      </t>
+     <t>The first signature can be verified using the JWK specified in <xref target="Introduction"/>,
+     while the second signature can be verified using the following JWK:</t>
+        <t>
+     <figure align="center">
+        <artwork>
+<![CDATA[{
+  "kid": "example.com:p384",
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0l
+        pg9",
+  "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9
+        Xxl",
+  "d": "Qsgq80kMs40sAn1gB7gLxAk1se37Kmh9AG18wWZ3SqgcPPRq1wwidNTi866Gt
+        4_0"
+}]]></artwork>
+    </figure>
+     </t>
+   </section>
+   <section anchor="multipleglobalcrit" title="Multiple Signature with Global &quot;crit&quot; Header">
+     <t>
+     <figure align="center">
+        <artwork>
+<![CDATA[{
+  "iss": "joe",
+  "exp": 1300819380,
+  "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
+  "numbers": [1e+30,4.5,6],
+  "__cleartext_signature": {
+    "crit": ["otherExt","https://example.com/extension"],
+    "signers": [{
+      "alg": "ES256",
+      "kid": "example.com:p256",
+      "otherExt": "Other Data",
+      "signature": "S9PqQU5z5zThIGUvErzf7oo8EetiUFEI1v8flisWJzw0HqqY-
+                    OuT_pDq1rG4gsSRAFjrazurl4NGyyxcPfeXzw"
+    },{
+      "alg": "RS256",
+      "kid": "example.com:r2048",
+      "otherExt": "Cool Stuff",
+      "https://example.com/extension": {
+        "life-is-great": true
+      },
+      "signature": "O-cnYTtgvyGmgX1YMQkcnRE0lnBw1EduMNVpdblKP-Iy0S143
+                    BBvXrCQoEW9oTkQm7X9wkJoohWQyU4qvojoxQxmf6GQ0tEXEI
+                    HqN7ixkPh_3ySXTl-gKTPiA5UL-GV44AS-k6N71qp8XhLORmU
+                    m68UlTWBZaOXL0JTGjsCyGpuwNiAQbx39ZbjabvGq4NfpPIQC
+                    2yjx_SKoPMiia54Mp0hz8U_S3oyAmHrG2mKFYrJ7k43aeDHK1
+                    RNRu8XrW2w-Ffh4KigpClAq4q272ZSsjizfYPPjW3gqInjMZz
+                    Qd8yZj5Bi5vCDcBOEKZMDoog-UzIy8SbZNl85TlkhK70oNRQ"
+    }]
+  }
+}]]></artwork>
+    </figure>
+     </t>
+     <t>
+       The first signature can be verified using the JWK specified in <xref target="Introduction"/>,
+     while the second signature can be verified using the JWK specified in <xref target="MultipleSignatures"/>.
+   </t>
+   </section>
    </section>
  </back>
 </rfc>
