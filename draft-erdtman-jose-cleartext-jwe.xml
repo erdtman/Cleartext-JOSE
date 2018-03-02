@@ -33,7 +33,7 @@
      <address>
        <postal>
          <street></street>
-         <code></code> <city></city>
+         <code></code> <city>Montpellier</city>
          <country>France</country>
        </postal>
        <email>anders.rundgren.net@gmail.com</email>
@@ -82,21 +82,21 @@
       are defined in the JSON Web Algorithms (JWA) <xref target="RFC7518" /> specification.
     </t>
     <t>
-      By keeping header parameters in cleartext, the structure is very easy to read.
-      However, with cleartext header parameters it is not suitable for all purposes, e.g.,
+      By keeping header parameters in cleartext, the structure becomes easier to read.
+      However, cleartext header parameters are not suitable for all purposes, e.g.,
       transport as HTTP query parameter is not possible without additional
-      encoding.
+      encoding.  The following is a summary of Cleartext JWE features:
     </t>
     <t>
-      Why not build directly on the JWE JSON Format? In the original JWE format
-      all data that are to be protected needs to be
-      base64url encoded, as a JSON format this becomes a contradiction in itself.
-      In the JWE JSON format, base64url encoding only the parts that must be
-      protected solves this (most of the data can then be JSON).  By serializing
-      the JSON directly for protection it is more direct to serialize the whole
-      package including, header parameters, recipients and the encrypted key than just the
-      protected header part. Furthermore, this makes reasoning about the
-      package easier since the whole thing is protected (not just parts).
+       <list style='symbols'>
+        <t>
+          All Header parameters including <spanx style="verb">encrypted_key</spanx> are protected.
+        </t>
+        <t>All Header parameters are supplied in clear.</t>
+        <t>
+          Simple syntax, intended matching an tentative Cleartext JWS counterpart.
+        </t>
+      </list>
     </t>
   </section>
 
@@ -122,20 +122,21 @@
     <t>
       Recipients has the same usage as in the JWE JSON encoding, but the structure
       is slightly different. Instead of an object with members <spanx style="verb">header</spanx> and
-      <spanx style="verb">encrypted_key</spanx>, these have been collapsed. The <spanx style="verb">recipients</spanx> array MUST
+      <spanx style="verb">encrypted_key</spanx>, these have been collapsed.
+      The <spanx style="verb">recipients</spanx> array MUST
       only be included when the message is addressed to multiple recipients.
     </t>
     <t>
       The <spanx style="verb">encrypted_key</spanx> member is used in the top-level JSON object when there is only
-      one recipient, i.e., the recipients array is not present. When multiple
+      one recipient, i.e., the <spanx style="verb">recipients</spanx> array is not present. When multiple
       recipients are targeted, there is one <spanx style="verb">encrypted_key</spanx> value for each of them
-      in the recipients array.
+      in the <spanx style="verb">recipients</spanx> array.
     </t>
+    <t>The Cleartext JWE JSON structure can be illustrated as below:</t>
     <t>
-      <figure align="center" anchor="fig:CleartextJWEStructure" title='Cleartext JWE JSON structure'>
+      <figure align="center">
         <artwork>
-<![CDATA[
-{
+<![CDATA[{
   <JWE Header Parameters />,
   "recipients": [{
     <JWE Header Parameters />,
@@ -145,106 +146,123 @@
   "iv": "<base64url-encoded data />",
   "tag": "<base64url-encoded data />",
   "ciphertext": "<base64url-encoded data />"
-}
-]]>
-        </artwork>
+}]]></artwork>
       </figure>
     </t>
     <t>
       Depending on the Key Management Mode and number of recipients,
       the structure and members used differs slightly.
     </t>
-    <section anchor="SingleRecipient" title="Single recipient">
+    <t>The following sub section describes the different modes in more detail.
+    All the examples encrypt the data specified in <xref target="testdata"/>.
+    Note that in many of the examples JSON strings are sliced due to RFC line
+    length constraints.
+  </t>
+    <section anchor="SingleRecipient" title="Single Recipient">
       <t>
-        For the simple case of Direct Encryption mode, parameters <spanx style="verb">alg</spanx>,
-        <spanx style="verb">encrypted_key</spanx> and <spanx style="verb">recipients</spanx> are not used
-	and <spanx style="verb">kid</spanx> refers to the CEK, if used.
-	<xref target="fig:DirectEncryptionExample"/> shows such an example.
-        <figure align="center" anchor="fig:DirectEncryptionExample" title='Direct Encryption Example'>
-          <artwork>
-<![CDATA[
-{
+        For the simple case of Direct Encryption mode, the parameters <spanx style="verb">alg</spanx> and
+        <spanx style="verb">encrypted_key</spanx> are not applicable.
+        Since a single recipient is targeted, the <spanx style="verb">recipients</spanx> parameter is not used either.
+        If not implied by the context, a <spanx style="verb">kid</spanx> can be used for identifying the CEK.
+  The following shows an example of Direct Encryption:
+     </t><t>
+        <figure align="center">
+          <artwork><![CDATA[{
   "enc": "A128CBC-HS256",
   "alg": "dir",
-  "kid": "secret-key"
-  "iv": "SgD79riBvQPjoRd1sV4Bjg",
-  "tag": "kBSE1sRUFqtRXT7iapqEqw",
-  "ciphertext": "E8jqajE5MQxwuFCewsxS-2EzA8MU5Ye9kcd52u20RqY"
-}
-]]>
-          </artwork>
-	  <!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
+  "kid": "a256bitkey",
+  "iv": "RL5u478E9seK-rKFl2JWIw",
+  "tag": "FP4DzUJ8eTmH9sWwC5eauQ",
+  "ciphertext": "5rdI6-qeuXGSltvckjRC7_bvpFKmPHjO103rkV-Gkdo"
+}]]></artwork>
         </figure>
       </t>
+      <t>The sample can be decrypted using the key in <xref target="a256bitkey"/>.
+    </t>
       <t>
         For the case of Key Encryption mode, a public key has been used to
-        encrypt the CEK so <spanx style="verb">alg</spanx> and <spanx style="verb">encrypted_key</spanx> members are used here
-        but recipients are left out since only of recipient is targeted.
-        <xref target="fig:KeyEncryptionExample"/> shows such an
-        example.
-        <figure align="center" anchor="fig:KeyEncryptionExample" title='Key Encryption Example'>
-          <artwork>
-<![CDATA[
-{
+        encrypt the CEK requiring the <spanx style="verb">alg</spanx> and <spanx style="verb">encrypted_key</spanx> parameters.
+        Since a single recipient is targeted, the <spanx style="verb">recipients</spanx> parameter is not used.
+        If not implied by the context, a <spanx style="verb">kid</spanx> can be used for identifying the public key.
+        The following shows an example of Key Encryption:
+      </t>
+      <t>
+        <figure align="center">
+          <artwork><![CDATA[{
   "enc": "A128CBC-HS256",
   "alg": "ECDH-ES+A256KW",
+  "kid": "example.com:p256",
   "epk": {
     "kty": "EC",
     "crv": "P-256",
-    "x": "EE3a2IBdLB92ePshpcfsN9Yvy7vN63jD33OGZCqY8XY",
-    "y": "9bmU509mBNLLSLZAH43TSvfqamjAJIYi4FzdZoG7zdg"
+    "x": "kuUDnNijtt6pWyIbKPWN6cM9W8pPRWPj85BJ5TFWyxU",
+    "y": "1QqjqwSZSEOYIm55fxtzqKreh9cZyzzWR7LLTnhyXJM"
   },
-  "encrypted_key": "uqCgVLzgtJU3N7gVHPHv0Jh7gCJI4-3xoKEdlKiK8yKzNS82MzGJJg",
-  "iv": "GXZ_hNz0Uct0v8xbB3b_OQ",
-  "tag": "f9HDAR_bdRinXAkUJLa6AA",
-  "ciphertext": "2as3jE2SWwg4NDg9OrZT_vPMIDHk6MYPKpIl1G959cE"
-}
-]]>
-          </artwork>
+  "encrypted_key": "rcXxHPcw3r-0s62RbF19BkR19qX6AxX66QSE1ox3hxj9TNqgq
+                    nVedQ",
+  "iv": "6tZQSbbYAMn1qqLEXiWk9g",
+  "tag": "PN-zZwoHWC35a3vW7zWrNw",
+  "ciphertext": "cr3ZNcuO7hRWCGEyixCa4xKuOuJhxbLsIzVxHiIeJUQ"
+}]]></artwork>
         </figure>
-	<!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
+      </t>
+      <t>
+        The sample can be decrypted using the private key in <xref target="example.com:p256"/>.
       </t>
     </section>
-    <section anchor="KeyEncryptionExample" title="Two or more recipients">
+    <section anchor="KeyEncryptionExample" title="Multiple Recipients">
       <t>
-        Two or more recipients can be addressed with key management modes, Key
+        Multiple recipients can be addressed with the key management modes Key
         Encryption, Key Wrapping and Key Agreement with Key Wrapping. When
         addressing multiple recipients, the <spanx style="verb">recipients</spanx> array is used. The
         <spanx style="verb">recipients</spanx> array contains a list of objects containing needed header parameters
-        and an encrypted CEK (<spanx style="verb">encrypted_key</spanx>). Header parameters MUST NOT be present at both
-        root and recipients level.
-
-        <figure align="center" anchor="fig:KeyEncryptionExamplewithonerecipient" title='Key Encryption Example with Two Recipients'>
-          <artwork>
-<![CDATA[
-{
+        and an encrypted CEK (<spanx style="verb">encrypted_key</spanx>).
+      </t>
+      <t>Header parameters MUST NOT be present at the top level with <spanx style="verb">alg</spanx>
+          as the only exception.  In case of the latter arrangement,
+          all enclosed encryption constructs MUST use the same algorithm as well as not
+          specifying the <spanx style="verb">alg</spanx> Header parameter.
+          See <xref target="multipleglobalalg"/> for an example.
+        </t>
+      <!-- One can imagine a global "crit" but I don't see much use of it and would like
+      us to think about it instead... -->
+      <t>The following example shows a Cleartext JWE object having multiple recipients:</t>
+      <t>
+        <figure align="center">
+          <artwork><![CDATA[{
   "enc": "A128CBC-HS256",
-  "alg": "ECDH-ES+A256KW",
   "recipients": [{
+    "alg": "ECDH-ES+A256KW",
+    "kid": "example.com:p256",
     "epk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "CIoAhk3bQf2trY0QZWSjyLsmYAUF9p1MDtZz0Fxkp34",
-      "y": "FbOuws2RjQQVe3VAlhhYPwbOmpAIl3SM_wq9LVuCt1E"
+      "x": "zDDhZC9PYlW-1Q7p6NNkO9ivAqQbtPaLURrggjYZM14",
+      "y": "0wEmDUfpk1OuwESKLkzZKlN-WSlf3e8ahGqtAAOVJxs"
     },
-    "encrypted_key": "UBj97DYItRi_TRdj15jI8G3cv9aefwXO96O3h2BiOwj_wRnCvinC5g"
+    "encrypted_key": "M60hnC-Qjjy-vbtHdAUesgweE-9WSKPeksNOXVLVSwiiAac
+                      Z_ShXaA"
   },{
-    "epk": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "B-2YiV42XibVWEohHBYeTOaeW3RSq924oecPfWl-VnA",
-      "y": "nWHiI4EnhRQqE-An60tebzUgfwgU9SarWvczE4lSQK8"
-    },
-    "encrypted_key": "CaWRrVhAsUkGrhy99WjRnXkndB1nD-fmiqs2noOZyC5jYtOohMfUJg"
+    "alg": "RSA-OAEP-256",
+    "kid": "example.com:r2048",
+    "encrypted_key": "JufGxy4rcyHBBCn4quw6pQxkh2nFFUve7iosQww6pTmv0fM
+                      FdzlW02S7u_BTbZ813q67K_rl_yO4ul6T3f4SonA2lIyQnB
+                      5FB62bZ5Vr560Mxka9vZ4omuS1hYTOI5ImnZRCeweLaWDe2
+                      GRAFmG1z9Ke5_p98g-VBiRml4aPFhEbvRQW-wv2ZKAV5r60
+                      CLxcw4FWL7U3TS4iiv_mmSIYCtC7MtBAdaGRpSrVF8MFKjy
+                      989xX8I1SvCOHB37MKfs2I6iUBlD1TZMITXtIuoco_zGK3y
+                      MLDHuIBwaa1GcEW6g6UNTBv32c25qvrJXepVgCNt1-oxR-I
+                      H4xCRPbxaZA6g"
   }],
-  "iv": "lQH2tp9A6BUCNu0YAgYjkQ",
-  "tag": "UWv7IpN9rK2xcqrRa8lijw",
-  "ciphertext": "UVh2n5qKzfFOttvJ2rCANZUQYp9L7FVbbiYqwRIgpyg"
-}
-]]>
-          </artwork>
+  "iv": "fX3cL0NTf9KZ71mSJ75QLg",
+  "tag": "NbDF8o1gdOJwoA253gbmxw",
+  "ciphertext": "gUFN2bXQeiaHIIc48xIWNcJUhHxVxUVhDkdLddb9y1U"
+}]]></artwork>
         </figure>
-	<!-- TBD The examples should include the keys used so that they can be reproduced and validated -->
+      </t>
+      <t>
+        The example can be decrypted using the private keys in <xref target="example.com:p256"/>
+        and <xref target="example.com:r2048"/>.
       </t>
     </section>
     <section anchor="AdditionalAuthenticatedData" title="Additional Authenticated Data (aad)">
@@ -507,7 +525,7 @@
         the application, it SHOULD consider the Cleartext JWE to be invalid.
       </t>
     </section>
-    <section anchor="Serialization" title="Serialization">
+    <section anchor="Serialization" title="Serialization and Normalization">
       <t>
         When having header parameters in cleartext serialization of them needs to be
         consistent across platforms. JSON <xref target="RFC8259" /> by itself does not produce
@@ -530,16 +548,12 @@
             ECMAScript section 7.1.12.1.
           </t>
           <t>
-            Property names MUST NOT be empty ("").
-          </t>
-          <t>
             Property names MUST be unique.
           </t>
           <t>
             Whitespace must be removed which in practical terms means removal
             of all characters outside of quoted strings having a value of x09,
             x0a, x0d or x20.
-	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace? -->
           </t>
           <t>
             JSON '\/' escape sequences within quoted strings must be treated as
@@ -553,23 +567,22 @@
             of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
             the latter have precedence. If the Unicode value is outside of
             the ASCII control character range, it must be replaced by the
-            corresponding Unicode character. ECMAScript section 24.3.2.2.
+            corresponding Unicode character. See ECMAScript section 24.3.2.2.
           </t>
         </list>
       </t>
       <t>
-        When rules have been applied to the example encryption it looks like this
-	(with line wraps within values for display purposes only):
-
-        <figure align="center" anchor="fig:NormalizedExample" title='Normalized example'>
-          <artwork>
-<![CDATA[
-{"enc":"A128CBC-HS256","alg":"ECDH-ES+A256KW","epk":{"kty":"EC",
-"crv":"P-256","x":"_DWaWB4PyzglQWEcS9_rHcjzT6u4OcPqQGDw0E4-Wkk",
-"y":"5UEVUw9aIICGszcsg_Y1Uem7swqEe3RqgbzSJTpkwow"},
-"encrypted_key":"9OQvCTWiL7nVOBq_bp-VHAuaNkIZu6EcsZP9EdawjXBqIqs9"}
-]]>
-          </artwork>
+        If these rules are applied to the public key encryption example in <xref target="SingleRecipient"/>, it should result in
+        the following string
+        (with line wraps within values for display purposes only):
+      </t>
+      <t>
+        <figure align="center">
+          <artwork><![CDATA[{"enc":"A128CBC-HS256","alg":"ECDH-ES+A256KW","kid":"example.com:
+p256","epk":{"kty":"EC","crv":"P-256","x":"kuUDnNijtt6pWyIbKPWN6c
+M9W8pPRWPj85BJ5TFWyxU","y":"1QqjqwSZSEOYIm55fxtzqKreh9cZyzzWR7LLT
+nhyXJM"},"encrypted_key":"rcXxHPcw3r-0s62RbF19BkR19qX6AxX66QSE1ox
+3hxj9TNqgqnVedQ","iv":"6tZQSbbYAMn1qqLEXiWk9g"}]]></artwork>
         </figure>
       </t>
     </section>
@@ -577,12 +590,14 @@
       <t>
         For JavaScript optimization reasons, ES6+'s JSON.parse() internally
         rearranges the order of properties with names expressed as integers, making a
-        parsed JSON string like '{"2":"a", "A":"b","1":"c"}' actually serialize as
-        '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST in
-        a here unspecified way, "emulate" this scheme since this behavior is not
+        parsed JSON string like '{"2":"First", "A":"Second","1":"Third"}' actually serialize as
+        '{"1":"Third","2":"First","A":"Second"}'. Due to this fact, signature creators MUST
+        "emulate" this scheme since this behavior is not
         intended to be an additional requirement to support by JSON tools in
-        general in order to use this specification.
-	Note:  This "unspecified" behavior MUST be specified for this spec to become actionable and interoperable!
+        general in order to use this specification.   The easiest way
+        accomplishing this is to programmatically make sure that possible
+        numeric property names always are created first and added in ascending
+        order.
       </t>
     </section>
   </section>
@@ -628,7 +643,7 @@
 
   <section anchor="Security" title="Security Considerations">
     <t>
-      This specification does (to the author's knowledge), not introduce
+      This specification does (to the authors' knowledge), not introduce
       additional vulnerabilities over what is specified for JWE
       <xref target="RFC7516"/>.
     </t>
@@ -640,6 +655,11 @@
       to all involved in that work. It is specifically inspired by JWE, so a
       special thanks to the authors of that document, Michael B. Jones and
       Joe Hildebrand.
+    </t>
+    <t>
+      Building on ES6 number normalization was originally
+      proposed by James Manger. This ultimately led to
+      the adoption of the entire ES6 JSON processing model.
     </t>
   </section>
  </middle>
@@ -665,8 +685,139 @@
 
    <section anchor="TestVectors" title="Test Vectors">
      <t>
-       TBD
+       This section contains a set of test vectors sharing a common characteristic,
+       long lines are sliced in order to cope with RFC line length constraints.
      </t>
+     <section anchor="testdata" title="Common Data to Encrypt">
+       <t>All examples in this specification encrypt the plaintext:
+         &quot;Hello encrypted world!&quot;.
+       Expressed as decimal bytes this yields:</t>
+       <t>
+         72, 101, 108, 108, 111, 32, 101, 110, 99,
+         114, 121, 112, 116, 101, 100, 32, 119, 111,
+         114, 108, 100, 33
+       </t>
+     </section>
+     <section anchor="a256bitkey" title="Symmetric Key &quot;a256bitkey&quot;">
+       <t>256-bit symmetric key, here expressed in hexadecimal notation:</t>
+       <t>
+         <figure align="center">
+           <artwork>7fdd851a3b9d2dafc5f0d00030e22b9343900cd42ede4948568a4a2ee655291a</artwork>
+         </figure>
+       </t>
+     </section>
+     <section anchor="example.com:p256" title="EC Key &quot;example.com:p256&quot;">
+       <t>EC private key, here expressed in JWK notation:</t>
+       <t>
+         <figure align="center">
+           <artwork><![CDATA[{
+  "kid": "example.com:p256",
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+  "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY",
+  "d": "nEsftLbi5u9pI8B0-drEjIuJzQgZie3yeqUR3BwWDl4"
+}]]></artwork>
+         </figure>
+       </t>
+     </section>
+     <section anchor="example.com:p384" title="EC Key &quot;example.com:p384&quot;">
+       <t>EC private key, here expressed in JWK notation:</t>
+       <t>
+         <figure align="center">
+           <artwork><![CDATA[{
+  "kid": "example.com:p384",
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0l
+        pg9",
+  "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9
+        Xxl",
+  "d": "Qsgq80kMs40sAn1gB7gLxAk1se37Kmh9AG18wWZ3SqgcPPRq1wwidNTi866Gt
+        4_0"
+}]]></artwork>
+         </figure>
+       </t>
+     </section>
+     <section anchor="example.com:r2048" title="RSA Key &quot;example.com:r2048&quot;">
+       <t>RSA private key, here expressed in JWK notation:</t>
+       <t>
+         <figure align="center">
+           <artwork><![CDATA[{
+  "kid": "example.com:r2048",
+  "kty": "RSA",
+  "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3
+        tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHx
+        klZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-
+        uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8b
+        ozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9i
+        ak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+  "e": "AQAB",
+  "d": "Q6iBYpnIrB2mkQZagP1lZuvBv9_osVaSZpLRvKD7DxhvbDTs0coaTJIoVCSB1
+        _VZip8zlUg-TnYWF1Liv9VSwfQ7ddxrcOUtej60mId0ntNz2HhbxJsWjiru8E
+        ZoArl0nEovLDNxlRgRMEyZwOKPC_xHT6nFrk7_s9pR5pEEcubGLAVBKnLCoPd
+        Lr-CBjCvWfJo73W5AZxoSb8MdWQOi5viXHURpr1Y_uBRsMuclovM56Vt05etM
+        sB1AbcTLUDwAuYrZWa1c08ql60ft7b3v6Q_rCL7EHtFU3PHAuP0mV7tM5BfAP
+        f4T0g9pbr4GOw7eqQCiYgPFE7gmCR_PDxv5YQ",
+  "p": "6DIM343hAtj1hQprJaVQ3T8YeIytIQ7Ma544C0A8BX-irjJfARy4fAlTSyBFe
+        auZ0WdbMGtKpAIgNVmfCfuP7W1bXw7UaxpqsQlbw54K1VtBs8xG-lee_2YQ3l
+        UlIiC1at6L0jxWYNkvp-LIfU2F5ZQir5ZWVXwgdMcgoNBABMc",
+  "q": "keacq0goV7pAtG2h33OAk-XOSclIF1agvEMMOKuud5V-vGQ6OaYldlYqZmSGg
+        F7RVlX0GZO70nPqatjd2G-tI8wEq5K_xmLQurUPFW8g___z0CTgJ62KbjFxCt
+        Gny5rsObX9im6cCc_EOtWZRaApzO8ykxfo1QcEjT4k1na7DzE",
+  "dp": "nPmJPnFal2Q5x_GdMlwq6QhI8OaZ_OlWRcM3PFP2v_jj8ERZehUCm8hqKTXu
+         Ai2C1dC8E2XVlj9hqu-l10fcq7Tsurz52laHnpwnD35-8HK7XmRR79jgwuUr
+         rkN90S6vt0ow2La15s-tqiBlTmDkjqqxMGfAghZiktA0PMPNI-0",
+  "dq": "D3c1lkZw2FPK9hVE-m3A7GyIwHOQq8CoCyzER-GS_eQf6hJpxaCiCfg6SF5R
+         j5v9brxvwqJRX46gA7F3WrED1m6S9Cj7ISlqXNBCiBAenGRiUOcHx8zyhpnB
+         FNeChOeoMLnk5V6yNawLbf0kYSgIJkwYvVTkfmhfCCXVO9KcI5E",
+  "qi": "wV0NzfCakfog1NFjtPzcga1MtkpizgPkxcP9LjNdvXW2YQZhM6GIEGjsu3iv
+         TrHrrM-4_bTQHOoTtfIY7wdqBKlwQTJOI0dH9FbNJ4ecGojRwgv83TN8aNKh
+         17Tt44jI5oibs2P-31B_VW9R1wwhnnOuCYpABfoSbtHIoCRme5I"
+}]]></artwork>
+         </figure>
+       </t>
+     </section>
+     <section anchor="multipleglobalalg" title="Multiple Recipients with Global &quot;alg&quot; Header">
+       <t>
+         <figure align="center">
+           <artwork><![CDATA[{
+  "enc": "A128CBC-HS256",
+  "alg": "ECDH-ES+A256KW",
+  "recipients": [{
+    "kid": "example.com:p256",
+    "epk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "43RpNrzkVJYkQzy38iCLIzkaksDex1s6MOuciPCK-k0",
+      "y": "QKU2l4MF1ak7ouucCcp59fha0q5pcOk3WXyXs-O6LiI"
+    },
+    "encrypted_key": "aMXF6e_7xLWzKgXTslyNyx8SZ0ODpZTrlFA5z1KAr6unZER
+                      F353dsQ"
+  },{
+    "kid": "example.com:p384",
+    "epk": {
+      "kty": "EC",
+      "crv": "P-384",
+      "x": "gDPrpkig_99ii2HfqWPwHz-WIr2xRbqwXFfKIw57MdnD2NDI-hs-w-e0
+            GM1vMAVH",
+      "y": "8O7mAfCT1QKlE66u2EMCvAue85b5s2pVlW7rpZ7YDwNUOg6C1FsQvadS
+            Qyrod6lJ"
+    },
+    "encrypted_key": "r3Ze98xdCvOGFVnxhahs6H0NHSRmD44lTzbvNUootJ8VFqy
+                      mt-ZLSg"
+  }],
+  "iv": "N4tuF0C6an86-OLF-G9cMg",
+  "tag": "SGT7Znl2TOIB4UjbJQzyvg",
+  "ciphertext": "nt0c3g52uCCl_vS_kJWZTepayHPiM89GjZey6YNoaDM"
+}]]></artwork>
+         </figure>
+       </t>
+       <t>
+         The example can be decrypted using the private keys in <xref target="example.com:p256"/>
+         and <xref target="example.com:p384"/>.
+       </t>
+     </section>
    </section>
  </back>
 </rfc>
