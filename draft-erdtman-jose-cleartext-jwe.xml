@@ -160,7 +160,7 @@
   </t>
     <section anchor="SingleRecipient" title="Single Recipient">
       <t>
-        For the simple case of Direct Encryption mode, the parameters <spanx style="verb">alg</spanx> and
+        In the Direct Encryption mode, the parameters <spanx style="verb">alg</spanx> and
         <spanx style="verb">encrypted_key</spanx> are not applicable.
         Since a single recipient is targeted, the <spanx style="verb">recipients</spanx> parameter is not used either.
         If not implied by the context, a <spanx style="verb">kid</spanx> can be used for identifying the CEK.
@@ -177,14 +177,14 @@
 }]]></artwork>
         </figure>
       </t>
-      <t>The sample can be decrypted using the key in <xref target="a256bitkey"/>.
+      <t>The example can be decrypted using the key in <xref target="a256bitkey"/>.
     </t>
       <t>
-        For the case of Key Encryption mode, a public key has been used to
+        In the Key Encryption mode, a specific key is used to
         encrypt the CEK requiring the <spanx style="verb">alg</spanx> and <spanx style="verb">encrypted_key</spanx> parameters.
         Since a single recipient is targeted, the <spanx style="verb">recipients</spanx> parameter is not used.
-        If not implied by the context, a <spanx style="verb">kid</spanx> can be used for identifying the public key.
-        The following shows an example of Key Encryption:
+        If not implied by the context, a <spanx style="verb">kid</spanx> can be used for identifying the encryption key.
+        The following shows an example of Key Encryption using a public key:
       </t>
       <t>
         <figure align="center">
@@ -207,7 +207,7 @@
         </figure>
       </t>
       <t>
-        The sample can be decrypted using the private key in <xref target="example.com:p256"/>.
+        The example can be decrypted using the private key in <xref target="example.com:p256"/>.
       </t>
     </section>
     <section anchor="KeyEncryptionExample" title="Multiple Recipients">
