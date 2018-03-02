@@ -91,7 +91,7 @@
       First, Cleartext JWS signatures are included in the signed data.
       Second, Cleartext JWS depends on predictable JSON Serialization
       rather than base64url encoding the data to be signed.
-      The table below shows the primary characteristics of the JWS variants.
+      The table below shows the primary characteristics of the JWS variants:
       </t>
       <texttable>
         <ttcol align="left"></ttcol>
@@ -140,20 +140,8 @@
       </t>
       <t>Note that the <spanx style="verb">signature</spanx> value was cut in two to cope with RFC line length constraints.</t>
     <t>
-      The following private key in JWK <xref target="RFC7517"/> format can be used for verifying the example signature.
-       </t><t>
-      <figure align="center">
-        <artwork>
-<![CDATA[{
-  "kid": "example.com:p256",
-  "kty": "EC",
-  "crv": "P-256",
-  "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
-  "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY",
-  "d": "nEsftLbi5u9pI8B0-drEjIuJzQgZie3yeqUR3BwWDl4"
-}]]></artwork>
-    </figure>
-         </t><t>
+      The key specified in <xref target="example.com:p256"/> can be used for verifying the example signature.
+    </t><t>
     Note: Recreating the example signature using the example private key would normally
     result in a different <spanx style="verb">signature</spanx> value
     since ECDSA relies on random data for signature generation.
@@ -297,7 +285,7 @@
         </list>
       </t>
     </section>
-    <section anchor="Serialization" title="Serialization">
+    <section anchor="Serialization" title="Serialization and Normalization">
       <t>
         When having header parameters in cleartext serialization of them needs to be
         consistent across platforms. JSON <xref target="RFC8259" /> by itself does not produce
@@ -344,7 +332,8 @@
         </list>
       </t>
       <t>
-        When rules have been applied to the example signature it should look like this
+        If these rules are applied to the example signature, it should result in
+        the following string
         (with line wraps between elements for display purposes only):
         </t>
       <t>
@@ -470,47 +459,9 @@
         </figure>
     </t>
       <t>
-        The ECDSA signature can be validated using the JWK specified in <xref target="Introduction"/>,
-      while the RSA signature can be validated using the following JWK:
+        The ECDSA signature can be validated using the key specified in <xref target="example.com:p256"/>,
+      while the RSA signature can be validated using the key specified in <xref target="example.com:r2048"/>.
       </t>
-      <t>
-     <figure align="center">
-        <artwork>
-<![CDATA[{
-  "kid": "example.com:r2048",
-  "kty": "RSA",
-  "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3
-        tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHx
-        klZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-
-        uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8b
-        ozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9i
-        ak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
-  "e": "AQAB",
-  "d": "Q6iBYpnIrB2mkQZagP1lZuvBv9_osVaSZpLRvKD7DxhvbDTs0coaTJIoVCSB1
-        _VZip8zlUg-TnYWF1Liv9VSwfQ7ddxrcOUtej60mId0ntNz2HhbxJsWjiru8E
-        ZoArl0nEovLDNxlRgRMEyZwOKPC_xHT6nFrk7_s9pR5pEEcubGLAVBKnLCoPd
-        Lr-CBjCvWfJo73W5AZxoSb8MdWQOi5viXHURpr1Y_uBRsMuclovM56Vt05etM
-        sB1AbcTLUDwAuYrZWa1c08ql60ft7b3v6Q_rCL7EHtFU3PHAuP0mV7tM5BfAP
-        f4T0g9pbr4GOw7eqQCiYgPFE7gmCR_PDxv5YQ",
-  "p": "6DIM343hAtj1hQprJaVQ3T8YeIytIQ7Ma544C0A8BX-irjJfARy4fAlTSyBFe
-        auZ0WdbMGtKpAIgNVmfCfuP7W1bXw7UaxpqsQlbw54K1VtBs8xG-lee_2YQ3l
-        UlIiC1at6L0jxWYNkvp-LIfU2F5ZQir5ZWVXwgdMcgoNBABMc",
-  "q": "keacq0goV7pAtG2h33OAk-XOSclIF1agvEMMOKuud5V-vGQ6OaYldlYqZmSGg
-        F7RVlX0GZO70nPqatjd2G-tI8wEq5K_xmLQurUPFW8g___z0CTgJ62KbjFxCt
-        Gny5rsObX9im6cCc_EOtWZRaApzO8ykxfo1QcEjT4k1na7DzE",
-  "dp": "nPmJPnFal2Q5x_GdMlwq6QhI8OaZ_OlWRcM3PFP2v_jj8ERZehUCm8hqKTXu
-         Ai2C1dC8E2XVlj9hqu-l10fcq7Tsurz52laHnpwnD35-8HK7XmRR79jgwuUr
-         rkN90S6vt0ow2La15s-tqiBlTmDkjqqxMGfAghZiktA0PMPNI-0",
-  "dq": "D3c1lkZw2FPK9hVE-m3A7GyIwHOQq8CoCyzER-GS_eQf6hJpxaCiCfg6SF5R
-         j5v9brxvwqJRX46gA7F3WrED1m6S9Cj7ISlqXNBCiBAenGRiUOcHx8zyhpnB
-         FNeChOeoMLnk5V6yNawLbf0kYSgIJkwYvVTkfmhfCCXVO9KcI5E",
-  "qi": "wV0NzfCakfog1NFjtPzcga1MtkpizgPkxcP9LjNdvXW2YQZhM6GIEGjsu3iv
-         TrHrrM-4_bTQHOoTtfIY7wdqBKlwQTJOI0dH9FbNJ4ecGojRwgv83TN8aNKh
-         17Tt44jI5oibs2P-31B_VW9R1wwhnnOuCYpABfoSbtHIoCRme5I"
-}]]></artwork>
-    </figure>
-      </t>
-      <t>Note that the parameters were sliced in order to cope with RFC line length constraints.</t>
     </section>
   </section>
 
@@ -591,8 +542,7 @@
    <section anchor="multipleglobalalg" title="Multiple Signature with Global &quot;alg&quot; Header">
      <t>
      <figure align="center">
-        <artwork>
-<![CDATA[{
+        <artwork><![CDATA[{
   "iss": "joe",
   "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
@@ -612,31 +562,15 @@
   }
 }]]></artwork>
     </figure>
-     </t>
-     <t>The first signature can be verified using the JWK specified in <xref target="Introduction"/>,
-     while the second signature can be verified using the following JWK:</t>
-        <t>
-     <figure align="center">
-        <artwork>
-<![CDATA[{
-  "kid": "example.com:p384",
-  "kty": "EC",
-  "crv": "P-384",
-  "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0l
-        pg9",
-  "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9
-        Xxl",
-  "d": "Qsgq80kMs40sAn1gB7gLxAk1se37Kmh9AG18wWZ3SqgcPPRq1wwidNTi866Gt
-        4_0"
-}]]></artwork>
-    </figure>
+     </t><t>
+       The first signature can be verified using the key specified in <xref target="example.com:p256"/>,
+     while the second signature can be verified using the key specified in <xref target="example.com:p384"/>.
      </t>
    </section>
    <section anchor="multipleglobalcrit" title="Multiple Signature with Global &quot;crit&quot; Header">
      <t>
      <figure align="center">
-        <artwork>
-<![CDATA[{
+        <artwork><![CDATA[{
   "iss": "joe",
   "exp": 1300819380,
   "escapeMe": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
@@ -669,10 +603,82 @@
     </figure>
      </t>
      <t>
-       The first signature can be verified using the JWK specified in <xref target="Introduction"/>,
-     while the second signature can be verified using the JWK specified in <xref target="MultipleSignatures"/>.
+       The first signature can be verified using the key specified in <xref target="example.com:p256"/>,
+     while the second signature can be verified using the key specified in <xref target="example.com:r2048"/>.
    </t>
    </section>
+   <section anchor="example.com:p256" title="EC Key &quot;example.com:p256&quot;">
+     <t>EC private key, here expressed in JWK notation:</t>
+     <t>
+     <figure align="center">
+        <artwork><![CDATA[{
+  "kid": "example.com:p256",
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "censDzcMEkgiePz6DXB7cDuwFemshAFR90UNVQFCg8Q",
+  "y": "xq8rze6ewG0-eVcSF72J77gKiD0IHnzpwHaU7t6nVeY",
+  "d": "nEsftLbi5u9pI8B0-drEjIuJzQgZie3yeqUR3BwWDl4"
+}]]></artwork>
+    </figure>
+     </t>
    </section>
+   <section anchor="example.com:p384" title="EC Key &quot;example.com:p384&quot;">
+     <t>EC private key, here expressed in JWK notation:</t>
+     <t>
+     <figure align="center">
+        <artwork><![CDATA[{
+  "kid": "example.com:p384",
+  "kty": "EC",
+  "crv": "P-384",
+  "x": "GLfdsvEwphRzS_twup7UFPVOk7_CKgHZ7dt_fJ2QHPBdJa1c5pfJcRIWTfT0l
+        pg9",
+  "y": "ovA5_QXmFbj9U4pjZ1AX_ZdVyIRZUBWW9cuZda_tupKfWQfmcQHzDmHGHbxl9
+        Xxl",
+  "d": "Qsgq80kMs40sAn1gB7gLxAk1se37Kmh9AG18wWZ3SqgcPPRq1wwidNTi866Gt
+        4_0"
+}]]></artwork>
+    </figure>
+     </t>
+   </section>
+     <section anchor="example.com:r2048" title="RSA Key &quot;example.com:r2048&quot;">
+     <t>RSA private key, here expressed in JWK notation:</t>
+     <t>
+     <figure align="center">
+        <artwork><![CDATA[{
+  "kid": "example.com:r2048",
+  "kty": "RSA",
+  "n": "hFWEXArvaZEpSP5qNX7x4C4Hl28GJQTNvnDwkfqiWs63kXbdyPeS06bz6GnY3
+        tfQ_093nGauWsimqKBmGAGMPtsV83Qxw1OIeO4ujbIIb9pema0qtVqs0MWlHx
+        klZGFkYfAmbuEUFxYDeLDHe0bkkXbSlB7_t8pCSvc8HLgHjEQjYOlFRwjR0D-
+        uLo-xgsCbpmCtYkB5lcT_zFgpRgY4zJNLSv7GZiz2S4Fc5ArGjd34lL47-L8b
+        ozuYjqNOv9sqX0Zgll5XaJ1ndvr7UqZu1xQFgm38reoM3IarBP_SkEFbt_v9i
+        ak602VO3k28fQhMaocP7JWR2YLT3kZM0-WTFw",
+  "e": "AQAB",
+  "d": "Q6iBYpnIrB2mkQZagP1lZuvBv9_osVaSZpLRvKD7DxhvbDTs0coaTJIoVCSB1
+        _VZip8zlUg-TnYWF1Liv9VSwfQ7ddxrcOUtej60mId0ntNz2HhbxJsWjiru8E
+        ZoArl0nEovLDNxlRgRMEyZwOKPC_xHT6nFrk7_s9pR5pEEcubGLAVBKnLCoPd
+        Lr-CBjCvWfJo73W5AZxoSb8MdWQOi5viXHURpr1Y_uBRsMuclovM56Vt05etM
+        sB1AbcTLUDwAuYrZWa1c08ql60ft7b3v6Q_rCL7EHtFU3PHAuP0mV7tM5BfAP
+        f4T0g9pbr4GOw7eqQCiYgPFE7gmCR_PDxv5YQ",
+  "p": "6DIM343hAtj1hQprJaVQ3T8YeIytIQ7Ma544C0A8BX-irjJfARy4fAlTSyBFe
+        auZ0WdbMGtKpAIgNVmfCfuP7W1bXw7UaxpqsQlbw54K1VtBs8xG-lee_2YQ3l
+        UlIiC1at6L0jxWYNkvp-LIfU2F5ZQir5ZWVXwgdMcgoNBABMc",
+  "q": "keacq0goV7pAtG2h33OAk-XOSclIF1agvEMMOKuud5V-vGQ6OaYldlYqZmSGg
+        F7RVlX0GZO70nPqatjd2G-tI8wEq5K_xmLQurUPFW8g___z0CTgJ62KbjFxCt
+        Gny5rsObX9im6cCc_EOtWZRaApzO8ykxfo1QcEjT4k1na7DzE",
+  "dp": "nPmJPnFal2Q5x_GdMlwq6QhI8OaZ_OlWRcM3PFP2v_jj8ERZehUCm8hqKTXu
+         Ai2C1dC8E2XVlj9hqu-l10fcq7Tsurz52laHnpwnD35-8HK7XmRR79jgwuUr
+         rkN90S6vt0ow2La15s-tqiBlTmDkjqqxMGfAghZiktA0PMPNI-0",
+  "dq": "D3c1lkZw2FPK9hVE-m3A7GyIwHOQq8CoCyzER-GS_eQf6hJpxaCiCfg6SF5R
+         j5v9brxvwqJRX46gA7F3WrED1m6S9Cj7ISlqXNBCiBAenGRiUOcHx8zyhpnB
+         FNeChOeoMLnk5V6yNawLbf0kYSgIJkwYvVTkfmhfCCXVO9KcI5E",
+  "qi": "wV0NzfCakfog1NFjtPzcga1MtkpizgPkxcP9LjNdvXW2YQZhM6GIEGjsu3iv
+         TrHrrM-4_bTQHOoTtfIY7wdqBKlwQTJOI0dH9FbNJ4ecGojRwgv83TN8aNKh
+         17Tt44jI5oibs2P-31B_VW9R1wwhnnOuCYpABfoSbtHIoCRme5I"
+}]]></artwork>
+    </figure>
+     </t>
+   </section>
+ </section>
  </back>
 </rfc>
