@@ -97,21 +97,21 @@
         <ttcol align="left"></ttcol>
         <ttcol align="left">JWS</ttcol>
         <ttcol align="left">Cleartext JWS</ttcol>
-        <c>Data&#xa0;to&#xa0;be&#xa0;Signed</c>
-        <c>Any&#xa0;type and&#xa0;format</c>
+        <c>Data&nbsp;to&nbsp;be&nbsp;Signed</c>
+        <c>Any&nbsp;type and&nbsp;format</c>
         <c>
           Non-intrusive signature object
           for inclusion in arbitrary JSON
           and JavaScript objects
         </c>
-        <c>Encoding&#xa0;of&#xa0;Signed&#xa0;Data</c>
+        <c>Encoding&nbsp;of&nbsp;Signed&nbsp;Data</c>
         <c>Base64Url</c>
         <c>None</c>
-        <c>Encoding&#xa0;of&#xa0;Header&#xa0;Data</c>
+        <c>Encoding&nbsp;of&nbsp;Header&nbsp;Data</c>
         <c>Base64Url</c>
         <c>None</c>
         <c>URL Friendly</c>
-        <c>Core&#xa0;feature</c>
+        <c>Core&nbsp;feature</c>
         <c>Out of scope</c>
       </texttable>
     <t>
@@ -326,9 +326,6 @@
             Whitespace must be removed which in practical terms means removal
             of all characters outside of quoted strings having a value of x09,
             x0a, x0d or x20.
-	    <!-- What about the ASCII Vertical Tab character (0x0b), which is also whitespace?
-      
-           AR: AFAICT it is forbidden in JSON -->
           </t>
           <t>
             JSON '\/' escape sequences within quoted strings must be treated as
@@ -348,17 +345,19 @@
       </t>
       <t>
         When rules have been applied to the example signature it should look like this
-        (with line wraps within values for display purposes only):
+        (with line wraps between elements for display purposes only):
         </t>
       <t>
         <figure align="center">
           <artwork>
-<![CDATA[{"iss":"joe","exp":1300819380,"escapeMe":"EUR$\u000f\nA'B\"\\\\\"/",
+<![CDATA[{"iss":"joe","exp":1300819380,
+"escapeMe":"\u20ac$\u000f\nA'B\"\\\\\"/",
 "numbers":[1e+30,4.5,6],"__cleartext_signature":
 {"alg":"ES256","kid":"example.com:p256"}}]]></artwork>
         </figure>
       </t>
-      <t>Note: EUR denotes the Euro symbol.</t>
+      <t>Note: \u20ac denotes the Euro symbol which is a single character, currently not
+      displayable &quot;as is&quot; in RFCs.</t>
       <t>
         The final step is converting the textual output into an UTF-8 formatted array.
         Applied to the sample this should yield the following bytes here shown in decimal notation:
@@ -387,8 +386,8 @@
         <t>
           For JavaScript optimization reasons, ES6+'s JSON.parse() internally
           rearranges the order of properties with names expressed as integers, making a
-          parsed JSON string like '{"2":"a", "A":"b","1":"c"}' actually serialize as
-          '{"1":"c","2":"a","A":"b"}'. Due to this fact, signature creators MUST
+          parsed JSON string like '{"2":"First", "A":"Second","1":"Third"}' actually serialize as
+          '{"1":"Third","2":"First","A":"Second"}'. Due to this fact, signature creators MUST
           "emulate" this scheme since this behavior is not
           intended to be an additional requirement to support by JSON tools in
           general in order to use this specification.   The easiest way
