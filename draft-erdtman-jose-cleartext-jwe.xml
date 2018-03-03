@@ -286,7 +286,7 @@
       </t>
       <t>
         Most steps are equivalent to the ones in JWE.
-	Those that have been changed are indicated as such.
+	Those that have been changed are indicated as [Modified].
       </t>
       <t>
         <list style="numbers">
@@ -317,6 +317,10 @@
             the result be the JWE Encrypted Key (<spanx style="verb">encrypted_key</spanx>).
           </t>
           <t>
+            When Direct Key Agreement or Direct Encryption are employed, let
+            the JWE Encrypted Key be the empty octet sequence.
+          </t>
+          <t>
             When Direct Encryption is employed, let the CEK be the shared
             symmetric key.
           </t>
@@ -344,18 +348,17 @@
             be the octet sequence representing the plaintext.
           </t>
           <t>
-            Create the JSON object(s) containing the desired set of Header Parameters,
+            [Modified] Create the JSON object(s) containing the desired set of Header Parameters,
 	    including <spanx style="verb">encrypted_key</spanx> if one recipient is addressed
             or the <spanx style="verb">recipients</spanx> array if more than one recipient is addressed.
-            (modified)
           </t>
           <t>
-            Serialize the JSON header parameters according to instructions in
-            <xref target="Serialization" />. (modified)
+            [Modified] Serialize the JSON header parameters according to instructions in
+            <xref target="Serialization" />.
           </t>
           <t>
-            Let the Additional Authenticated Data encryption parameter be
-            the serialized JSON header. (modified)
+            [Modified] Let the Additional Authenticated Data encryption parameter be
+            the serialized JSON header.
           </t>
           <t>
             Encrypt M using the CEK, the JWE Initialization Vector, and the
@@ -372,9 +375,15 @@
             Authentication Tag).
           </t>
           <t>
-            Finalize the encryption by adding the JWE Initialization Vector,
+            [Modified] Not applicable to Cleartext JWE, see <xref target="AdditionalAuthenticatedData"/>.
+          </t>
+          <t>
+            [Modified] Finalize the encryption by adding the JWE Initialization Vector,
             JWE Authentication Tag and JWE Ciphertext to the JSON
-            header parameters and let this be the encrypted package. (modified)
+            header parameters and let this be the encrypted package.
+            Note: The <spanx style="verb">iv</spanx> member MUST NOT be
+            present when the JWE Initialization
+            Vector value is empty.
           </t>
         </list>
       </t>
@@ -399,38 +408,30 @@
       </t>
       <t>
         Most steps are equivalent to the ones in JWE. Those that has been 
-        changed or removed are indicated as such. This is a temporary solution
+        changed or removed are indicated as [Modified]. This is a temporary solution
         to make it easy to spot the difference between JWE and Cleartext JWE,
         It will be removed in final version.
       </t>
       <t>
         <list style="numbers">
           <t>
-            Parse the Cleartext JWE JSON structure. (modified)
+            [Modified] Parse the Cleartext JWE JSON structure.
           </t>
           <t>
-            Extract and remove Cleartext JWE components JWE Initialization Vector (<spanx style="verb">iv</spanx>),
+            [Modified] Extract and remove Cleartext JWE components JWE Initialization Vector (<spanx style="verb">iv</spanx>),
             JWE Ciphertext (<spanx style="verb">ciphertext</spanx>) and JWE Authentication Tag (<spanx style="verb">tag</spanx>).
-            Let the remaining JSON be the JWE Protected Header. (added)
-          </t>
-          <t>
+            Let the remaining JSON be the JWE Protected Header.
             Base64url decode the encoded representations of the JWE Encrypted
             Key, the JWE Initialization Vector, the JWE Ciphertext, and the
             JWE Authentication Tag, following the restriction that no line
             breaks, whitespace, or other additional characters have been
-            used.  (modified)
+            used.
           </t>
           <t>
-            Verify that the... (removed, JWE step not needed for Cleartext JWE)
+            [Modified] Not applicable to Cleartext JWE.
           </t>
           <t>
-            Let the JOSE Header be the union of the members of the JWE
-            Protected Header and the corresponding JWE Per-Recipient Header.
-            During this step, verify that the resulting JOSE Header does not
-            contain duplicate Header Parameter names.  This restriction includes
-            that the same Header Parameter name also MUST NOT occur in distinct
-            JSON object values that together comprise the JOSE Header.
-            (modified)
+            [Modified] Not applicable to Cleartext JWE.
           </t>
           <t>
             Verify that the implementation understands and can process all
@@ -467,7 +468,7 @@
             considerations on mitigating timing attacks.
           </t>
           <t>
-            When Direct Key Agreement or Direct Encryption are employed, verify
+            [Modified] When Direct Key Agreement or Direct Encryption are employed, verify
             that the JWE Encrypted Key value is absent.
           </t>
           <t>
@@ -479,16 +480,16 @@
             recipient or not.
           </t>
           <t>
-            If the more than one recipient is addressed, repeat this process
-            (steps 4-12) for each recipient contained in the representation.
+            [Modified] If the more than one recipient is addressed, repeat this process
+            (steps 5-12) for each recipient contained in the representation.
           </t>
           <t>
-            Serialize the JWE Protected Header according to instructions in
-            <xref target="Serialization" />. (modified)
+            [Modified] Serialize the JWE Protected Header according to instructions in
+            <xref target="Serialization" />.
           </t>
           <t>
-            Let the Additional Authenticated Data encryption parameter be
-            the serialized the JWE Protected Header. (modified)
+            [Modified] Let the Additional Authenticated Data encryption parameter be
+            the serialized the JWE Protected Header.
           </t>
           <t>
             Decrypt the JWE Ciphertext using the CEK, the JWE Initialization
@@ -506,12 +507,13 @@
           </t>
           <t>
             If there was no recipient for which all of the decryption steps
-            succeeded, then the Cleartext JWE MUST be considered invalid.  Otherwise,
+            succeeded, then the JWE MUST be considered invalid.  Otherwise,
             output the plaintext.  With multiple recipients, also
             return a result to the application indicating for which of the
-            recipients the decryption succeeded and failed. (modified)
+            recipients the decryption succeeded and failed.
           </t>
           <t>
+            [Modified] Additional step.
             If the JSON data structure needs to be verified later, put back the JWE
             Initialization Vector (<spanx style="verb">iv</spanx>), JWE Ciphertext (<spanx style="verb">ciphertext</spanx>) and
             JWE Authentication Tag (<spanx style="verb">tag</spanx>) into the JWE Protected Header.
