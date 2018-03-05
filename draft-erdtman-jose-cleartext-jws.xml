@@ -79,7 +79,7 @@
       without representing the JSON to be signed in a non-JSON representation, such as base64url-encoded JSON.
       The signature and information about the signature is added to the JSON object when it is signed.
       The signature calculation for signing the JSON object
-      uses the predictable JSON serialization defined in ECMAScript version 6.
+      uses the predictable JSON serialization defined in ECMAScript version 6 <xref target="ES6"/>.
       By including the signature information in the JSON object to be signed, it is easy to
       inspect data in transit and when archived, integrity can be guaranteed.
     </t>
@@ -225,7 +225,7 @@
 	    <!-- TBD This needs to be more specific.  Are you just talking about accepting input or doing ES6 serialization? -->
           </t>
           <t>
-            Create the <spanx style="verb">__cleartext_signature</spanx> object with the header parameters to be used and add it
+            Create the <spanx style="verb">__cleartext_signature</spanx> object with the Header Parameters to be used and add it
             as a top-level member to the object to be signed with the key
             <spanx style="verb">__cleartext_signature</spanx>.
           </t>
@@ -509,10 +509,9 @@
   <section anchor="IANA" title="IANA Considerations">
       <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
         <t>
-          This section registers the <spanx style="verb">signature</spanx>
-          and <spanx style="verb">signers</spanx> header parameter in the "JSON Web
-          Signature and Encryption Header Parameters" registry
-          in the manner described in <xref target="RFC7515"/>.
+          This section registers the following Header Parameters in the
+	  IANA "JSON Web Signature and Encryption Header Parameters" registry
+          <xref target="IANA.JOSE.HeaderParameters"/>.
         </t>
         <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
           <t>
@@ -569,6 +568,16 @@
       <reference anchor="IANA.JOSE.Algorithms" target="https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms">
         <front>
           <title>JSON Web Signature and Encryption Algorithms</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
+      <reference anchor="IANA.JOSE.HeaderParameters" target="https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-header-parameters">
+        <front>
+          <title>JSON Web Signature and Encryption Header Parameters</title>
           <author>
             <organization>IANA</organization>
           </author>
