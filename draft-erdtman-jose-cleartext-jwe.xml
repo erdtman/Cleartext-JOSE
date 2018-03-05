@@ -60,12 +60,12 @@
 
    <abstract>
      <t>
-       Cleartext JSON Web Encryption (JWE) represents encrypted content using JSON data structures.
-       With the use of the predictable serialization defined in ECMAScript version 6,
-       protected header parameters can remain in cleartext.
-       Cleartext JWE reuses data structures and semantics from JWE whenever practical and reasonable.
-       Cryptographic algorithms and identifiers used by this specification
-       are defined in the JSON Web Algorithms specification.
+       Cleartext JSON Web Encryption (JWE) is a means of representing encrypted content as a JSON object
+       without representing JSON values to be integrity protected in a non-JSON representation, such as base64url-encoded JSON.
+       The integrity protection calculation for the authenticated encryption performed
+       uses the predictable JSON serialization defined in ECMAScript version 6.
+       Cleartext JWE builds on the JWE, JWA, and JWK specifications,
+       reusing data structures and semantics from these specifications, where applicable.
      </t>
    </abstract>
  </front>
@@ -74,27 +74,37 @@
   <section anchor="Introduction" title="Introduction">
     <t>
       Cleartext JSON Web Encryption (JWE) represents encrypted content using JSON-based data structures.
-      With the use of predictable serialization
-      defined in ECMAScript version 6 <xref target="ES6"/> protected header parameters
-      can remain cleartext. Cleartext JWE reuses header parameters and most of the processing
-      semantics from JWE.
-      Cryptographic algorithms and identifiers used by this specification
-      are defined in the JSON Web Algorithms (JWA) <xref target="RFC7518" /> specification.
+      Computing the integrity-protected data for the authenticated encryption operation performed
+      uses the predictable JSON serialization defined in ECMAScript version 6 <xref target="ES6"/>.
+      This enables integrity-protected Header Parameters to be represented in JSON,
+      rather than in a non-JSON representation, such as base64url-encoded JSON.
     </t>
     <t>
-      By keeping header parameters in cleartext, the structure becomes easier to read.
-      However, cleartext header parameters are not suitable for all purposes, e.g.,
-      transport as HTTP query parameter is not possible without additional
-      encoding.  The following is a summary of Cleartext JWE features:
+      Cleartext JWS builds on the JWE <xref target="RFC7516"/>,
+      JWA <xref target="RFC7518"/>, and JWK <xref target="RFC7517"/> specifications,
+      reusing data structures and semantics from these specifications, where applicable.
+      Cryptographic algorithm identifiers used by this specification come from the
+      IANA "JSON Web Signature and Encryption Algorithms" registry <xref target="IANA.JOSE.Algorithms"/>.
+    </t>
+    <t>
+      By keeping Header Parameters in cleartext, the structure becomes easier to read.
+      However, cleartext Header Parameters are not suitable for all purposes, e.g.,
+      transport as an HTTP query parameter is not possible without additional
+      encoding.
+    </t>
+    <t>
+      The following is a summary of Cleartext JWE features:
     </t>
     <t>
        <list style='symbols'>
         <t>
-          All Header parameters including <spanx style="verb">encrypted_key</spanx> are protected.
+          All Header Parameters including <spanx style="verb">encrypted_key</spanx> are integrity protected.
         </t>
-        <t>All Header parameters are supplied in clear.</t>
         <t>
-          Simple syntax, intended matching an tentative Cleartext JWS counterpart.
+	  All Header Parameters are represented in JSON, with no additional encoding.
+	</t>
+        <t>
+          The design choices parallel those in the closely-related Cleartext JWS specification.
         </t>
       </list>
     </t>
@@ -112,19 +122,17 @@
 
   <section anchor="EncryptionStructure" title="Encryption Structure">
     <t>
-      This section explains how the encryption structure is formed for the
-      different cases available.
-    </t>
-    <t>
-      The outermost layer contains equivalants of the JWE header parameters,
+      This section describes the representation of Cleartext JWEs.
+      Cleartext JWEs are JSON objects.
+      The members of this JSON object are JWE Header Parameters,
       with the addition of <spanx style="verb">recipients</spanx>, <spanx style="verb">encrypted_key</spanx>, and <spanx style="verb">ciphertext</spanx> members.
     </t>
     <t>
-      Recipients has the same usage as in the JWE JSON encoding, but the structure
+      The <spanx style="verb">recipients</spanx> member has the same usage as in the JWE JSON encoding, but the structure
       is slightly different. Instead of an object with members <spanx style="verb">header</spanx> and
-      <spanx style="verb">encrypted_key</spanx>, these have been collapsed.
-      The <spanx style="verb">recipients</spanx> array MUST
-      only be included when the message is addressed to multiple recipients.
+      <spanx style="verb">encrypted_key</spanx>, all of these are now Header Parameters.
+      The <spanx style="verb">recipients</spanx> member MUST NOT be included
+      unless the message is addressed to multiple recipients.
     </t>
     <t>
       The <spanx style="verb">encrypted_key</spanx> member is used in the top-level JSON object when there is only
@@ -153,16 +161,16 @@
       Depending on the Key Management Mode and number of recipients,
       the structure and members used differs slightly.
     </t>
-    <t>The following sub section describes the different modes in more detail.
+    <t>
+      The following sub-section describes the different modes in more detail.
     All the examples encrypt the data specified in <xref target="testdata"/>.
-    Note that in many of the examples JSON strings are sliced due to RFC line
-    length constraints.
-  </t>
-    <section anchor="SingleRecipient" title="Single Recipient">
+      (Line breaks within values are for display purposes only.)
+    </t>
+    <section anchor="SingleRecipientDirect" title="Single Recipient with Direct Encryption">
       <t>
         In the Direct Encryption mode, the parameters <spanx style="verb">alg</spanx> and
         <spanx style="verb">encrypted_key</spanx> are not applicable.
-        Since a single recipient is targeted, the <spanx style="verb">recipients</spanx> parameter is not used either.
+        Since a single recipient is targeted, the <spanx style="verb">recipients</spanx> parameter is not used.
         If not implied by the context, a <spanx style="verb">kid</spanx> can be used for identifying the CEK.
   The following shows an example of Direct Encryption:
      </t><t>
@@ -179,6 +187,9 @@
       </t>
       <t>The example can be decrypted using the key in <xref target="a256bitkey"/>.
     </t>
+    </section>
+
+    <section anchor="SingleRecipientKeyEncryption" title="Single Recipient with Key Encryption">
       <t>
         In the Key Encryption mode, a specific key is used to
         encrypt the CEK requiring the <spanx style="verb">alg</spanx> and <spanx style="verb">encrypted_key</spanx> parameters.
@@ -207,7 +218,7 @@
         </figure>
       </t>
       <t>
-        The example can be decrypted using the private key in <xref target="example.com:p256"/>.
+        The example can be decrypted using the key in <xref target="example.com:p256"/>.
       </t>
     </section>
     <section anchor="KeyEncryptionExample" title="Multiple Recipients">
@@ -215,17 +226,18 @@
         Multiple recipients can be addressed with the key management modes Key
         Encryption, Key Wrapping and Key Agreement with Key Wrapping. When
         addressing multiple recipients, the <spanx style="verb">recipients</spanx> array is used. The
-        <spanx style="verb">recipients</spanx> array contains a list of objects containing needed header parameters
+        <spanx style="verb">recipients</spanx> array contains a list of objects containing Header Parameters
         and an encrypted CEK (<spanx style="verb">encrypted_key</spanx>).
       </t>
-      <t>Header parameters MUST NOT be present at the top level with <spanx style="verb">alg</spanx>
-          as the only exception.  In case of the latter arrangement,
-          all enclosed encryption constructs MUST use the same algorithm as well as not
-          specifying the <spanx style="verb">alg</spanx> Header parameter.
-          See <xref target="multipleglobalalg"/> for an example.
-        </t>
-      <!-- One can imagine a global "crit" but I don't see much use of it and would like
-      us to think about it instead... -->
+      <t>
+	A given Header Parameter MUST NOT occur in both the top-level JSON object
+	and in a <spanx style="verb">recipients</spanx> array value.
+	Any Header Parameter occurring in the top-level object applies to all recipients.
+	For instance, <spanx style="verb">alg</spanx> MUST either be present at the top level
+	or for each recipient, both not both.
+	See <xref target="multipleglobalalg"/> for an example using
+	a common <spanx style="verb">alg</spanx> value for multiple recipients.
+      </t>
       <t>The following example shows a Cleartext JWE object having multiple recipients:</t>
       <t>
         <figure align="center">
@@ -261,18 +273,20 @@
         </figure>
       </t>
       <t>
-        The example can be decrypted using the private keys in <xref target="example.com:p256"/>
+        The example can be decrypted using the keys in <xref target="example.com:p256"/>
         and <xref target="example.com:r2048"/>.
       </t>
     </section>
     <section anchor="AdditionalAuthenticatedData" title="Additional Authenticated Data (aad)">
       <t>
-        As a difference to JWE JSON representation, Cleartext JWE does not have an
-        <spanx style="verb">aad</spanx> member. Since Cleartext JWE integrity protects the whole header parameters
-        structure it is recommended that one add additional header parameters to protect
-        additional cleartext data that needs to be connected to the ciphertext.
-        See JWE section 4.2. (Public Header Parameter Names) and 4.3. (Private
-        Header Parameter Names) for details on how to add additional header parameters.
+        Unlike the JWE JSON Serialization, Cleartext JWE does not have an
+        <spanx style="verb">aad</spanx> member.
+	Since Cleartext JWE integrity protects the whole Header Parameters
+        structure, one can add additional Header Parameters to integrity protect
+        additional data that is connected to the ciphertext.
+        See Section 4.2 of <xref target="RFC7516"/> (Public Header Parameter Names)
+	and Section 4.3 of <xref target="RFC7516"/> (Private Header Parameter Names)
+	for details on adding additional Header Parameters.
       </t>
     </section>
   </section>
@@ -353,7 +367,7 @@
             or the <spanx style="verb">recipients</spanx> array if more than one recipient is addressed.
           </t>
           <t>
-            [Modified] Serialize the JSON header parameters according to instructions in
+            [Modified] Serialize the JSON Header Parameters according to instructions in
             <xref target="Serialization" />.
           </t>
           <t>
@@ -380,7 +394,7 @@
           <t>
             [Modified] Finalize the encryption by adding the JWE Initialization Vector,
             JWE Authentication Tag and JWE Ciphertext to the JSON
-            header parameters and let this be the encrypted package.
+            Header Parameters and let this be the encrypted package.
             Note: The <spanx style="verb">iv</spanx> member MUST NOT be
             present when the JWE Initialization
             Vector value is empty.
@@ -408,9 +422,9 @@
       </t>
       <t>
         Most steps are equivalent to the ones in JWE. Those that has been 
-        changed or removed are indicated as [Modified]. This is a temporary solution
-        to make it easy to spot the difference between JWE and Cleartext JWE,
-        It will be removed in final version.
+        changed or removed are indicated as [Modified]. This is a temporary construction
+        to make it easy to understand the differences between JWE and Cleartext JWE,
+        and will be removed in final version.
       </t>
       <t>
         <list style="numbers">
@@ -529,54 +543,16 @@
     </section>
     <section anchor="Serialization" title="Serialization and Normalization">
       <t>
-        When having header parameters in cleartext serialization of them needs to be
-        consistent across platforms. JSON <xref target="RFC8259" /> by itself does not produce
-        predictable serialization of data. However, ES6 <xref target="ES6"/> defines how to produce
-        JSON that is predictable. By following the ES6 serialization directives,
-        one can get predictable results, i.e., the JSON serializer MUST follow the
-        directives set out by ES6 when serializing data. The rules defined below
-        take the essence from the ES6 specification and list what that means
-        in practical terms.
+	When integrity protecting (or signing) unencoded JSON data, the serialization (canonicalization) of it
+	used as an input to the cryptographic function needs to be consistent across platforms.
+        See the "Serialization and Normalization" section of the "Cleartext JSON Web Signature (JWS)" specification
+	<!-- TBD xref needed here once we publish the initial versions -->
+	for a summary of how to achieve predictable serialization using the ES6 rules.
       </t>
       <t>
-        Rules for serialization:
-        <list style="symbols">
-          <t>
-            The original property serialization order MUST be preserved as
-            described by ECMAScript section 9.1.12.
-          </t>
-          <t>
-            JSON data of the type <spanx style="verb">Number</spanx>, MUST be processed according to
-            ECMAScript section 7.1.12.1.
-          </t>
-          <t>
-            Property names MUST be unique.
-          </t>
-          <t>
-            Whitespace must be removed which in practical terms means removal
-            of all characters outside of quoted strings having a value of x09,
-            x0a, x0d or x20.
-          </t>
-          <t>
-            JSON '\/' escape sequences within quoted strings must be treated as
-            "degenerate" equivalents to '/' by rewriting them.
-          </t>
-          <t>
-            Unicode escape sequences (\uhhhh) within quoted strings must be
-            adjusted as follows: If the Unicode value falls within the
-            traditional ASCII control character range (0x00-0x1f and 0x7f), it must
-            be rewritten in lowercase hexadecimal notation unless it is one
-            of the predefined JSON escapes (\" \\ \b \f \n \r \t) because
-            the latter have precedence. If the Unicode value is outside of
-            the ASCII control character range, it must be replaced by the
-            corresponding Unicode character. See ECMAScript section 24.3.2.2.
-          </t>
-        </list>
-      </t>
-      <t>
-        If these rules are applied to the public key encryption example in <xref target="SingleRecipient"/>, it should result in
+        If these rules are applied to the public key encryption example in <xref target="SingleRecipientDirect"/>, it should result in
         the following string
-        (with line wraps within values for display purposes only):
+        (with line breaks within values for display purposes only):
       </t>
       <t>
         <figure align="center">
@@ -588,18 +564,12 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
         </figure>
       </t>
     </section>
-    <section anchor="ES6Interoperability" title="ES6+ Interoperability">
+
+    <section anchor="ES6Interoperability" title="ES6+ Interoperability Considerations">
       <t>
-        For JavaScript optimization reasons, ES6+'s JSON.parse() internally
-        rearranges the order of properties with names expressed as integers, making a
-        parsed JSON string like '{"2":"First", "A":"Second","1":"Third"}' actually serialize as
-        '{"1":"Third","2":"First","A":"Second"}'. Due to this fact, signature creators MUST
-        "emulate" this scheme since this behavior is not
-        intended to be an additional requirement to support by JSON tools in
-        general in order to use this specification.   The easiest way
-        accomplishing this is to programmatically make sure that possible
-        numeric property names always are created first and added in ascending
-        order.
+        See the "ES6+ Interoperability Considerations" section of the "Cleartext JSON Web Signature (JWS)" specification
+	<!-- TBD xref needed here once we publish the initial versions -->
+	for a description of special care that may need to be taken when ordering the Header Parameter names.
       </t>
     </section>
   </section>
@@ -607,16 +577,16 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
   <section anchor="IANA" title="IANA Considerations">
     <section anchor="IANAJSONHeaderParametersRegistry" title="JSON Header Parameters Registry">
       <t>
-        This section registers "ciphertext", "encrypted_key" and "recipients"
-        header parameters in the "JSON Web Signature and Encryption Header
-        Parameters" registry in the manner described in <xref target="RFC7516"/>.
+        This section registers the following Header Parameters in the
+	IANA "JSON Web Signature and Encryption Header Parameters" registry
+	<xref target="IANA.JOSE.HeaderParameters"/>.
       </t>
       <section anchor="IANAJSONHeaderParametersRegistryContents" title="Registry Contents">
         <t>
           <list style='symbols'>
             <t>Header Parameter Name: <spanx style="verb">ciphertext</spanx></t>
             <t>Header Parameter Description: The base64url-encoded ciphertext</t>
-            <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWE</spanx></t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">Cleartext JWE</spanx></t>
             <t>Change Controller: IESG</t>
             <t>Specification Document(s): [this document]</t>
           </list>
@@ -625,7 +595,7 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
           <list style='symbols'>
             <t>Header Parameter Name: <spanx style="verb">encrypted_key</spanx></t>
             <t>Header Parameter Description: The base64url-encoded encrypted CEK</t>
-            <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWE</spanx></t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">Cleartext JWE</spanx></t>
             <t>Change Controller: IESG</t>
             <t>Specification Document(s): [this document]</t>
           </list>
@@ -633,8 +603,8 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
         <t>
           <list style='symbols'>
             <t>Header Parameter Name: <spanx style="verb">recipients</spanx></t>
-            <t>Header Parameter Description: List of targeted recipients, each with a set of headers</t>
-            <t>Header Parameter Usage Location(s): <spanx style="verb">CT-JWE</spanx></t>
+            <t>Header Parameter Description: List of targeted recipients, each with a set of Header Parameters</t>
+            <t>Header Parameter Usage Location(s): <spanx style="verb">Cleartext JWE</spanx></t>
             <t>Change Controller: IESG</t>
             <t>Specification Document(s): [this document]</t>
           </list>
@@ -645,25 +615,11 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
 
   <section anchor="Security" title="Security Considerations">
     <t>
-      This specification does (to the authors' knowledge), not introduce
-      additional vulnerabilities over what is specified for JWE
+      The same security considerations apply to this specification as do for JWE
       <xref target="RFC7516"/>.
     </t>
   </section>
 
-  <section anchor="Acknowledgements" title="Acknowledgements">
-    <t>
-      This document builds on the work done in the JOSE WG so a big thanks goes out
-      to all involved in that work. It is specifically inspired by JWE, so a
-      special thanks to the authors of that document, Michael B. Jones and
-      Joe Hildebrand.
-    </t>
-    <t>
-      Building on ES6 number normalization was originally
-      proposed by James Manger. This ultimately led to
-      the adoption of the entire ES6 JSON processing model.
-    </t>
-  </section>
  </middle>
 
  <back>
@@ -671,6 +627,7 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
      <?rfc include='reference.RFC.2119'?>
      <?rfc include='reference.RFC.8259'?>
      <?rfc include='reference.RFC.7516'?>
+     <?rfc include='reference.RFC.7517'?>
      <?rfc include='reference.RFC.7518'?>
      <?rfc include='reference.RFC.8174'?>
 
@@ -685,10 +642,34 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
      </reference>
    </references>
 
+   <references title="Informative References">
+
+      <reference anchor="IANA.JOSE.Algorithms" target="https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms">
+        <front>
+          <title>JSON Web Signature and Encryption Algorithms</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
+      <reference anchor="IANA.JOSE.HeaderParameters" target="https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-header-parameters">
+        <front>
+          <title>JSON Web Signature and Encryption Header Parameters</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
+   </references>
+
    <section anchor="TestVectors" title="Test Vectors">
      <t>
-       This section contains a set of test vectors sharing a common characteristic,
-       long lines are sliced in order to cope with RFC line length constraints.
+       This section contains a set of test vectors.
+       (Line breaks within values are for display purposes only.)
      </t>
      <section anchor="testdata" title="Common Data to Encrypt">
        <t>All examples in this specification encrypt the plaintext:
@@ -708,8 +689,8 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
          </figure>
        </t>
      </section>
-     <section anchor="example.com:p256" title="EC Key &quot;example.com:p256&quot;">
-       <t>EC private key, here expressed in JWK notation:</t>
+     <section anchor="example.com:p256" title="Elliptic Curve Key &quot;example.com:p256&quot;">
+       <t>Elliptic Curve private key, represented as a JWK:</t>
        <t>
          <figure align="center">
            <artwork><![CDATA[{
@@ -723,8 +704,8 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
          </figure>
        </t>
      </section>
-     <section anchor="example.com:p384" title="EC Key &quot;example.com:p384&quot;">
-       <t>EC private key, here expressed in JWK notation:</t>
+     <section anchor="example.com:p384" title="Elliptic Curve Key &quot;example.com:p384&quot;">
+       <t>Elliptic Curve private key, represented as a JWK:</t>
        <t>
          <figure align="center">
            <artwork><![CDATA[{
@@ -742,7 +723,7 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
        </t>
      </section>
      <section anchor="example.com:r2048" title="RSA Key &quot;example.com:r2048&quot;">
-       <t>RSA private key, here expressed in JWK notation:</t>
+       <t>RSA private key, represented as a JWK:</t>
        <t>
          <figure align="center">
            <artwork><![CDATA[{
@@ -780,7 +761,7 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
          </figure>
        </t>
      </section>
-     <section anchor="multipleglobalalg" title="Multiple Recipients with Global &quot;alg&quot; Header">
+     <section anchor="multipleglobalalg" title="Multiple Recipients with Common &quot;alg&quot; Header Parameter">
        <t>
          <figure align="center">
            <artwork><![CDATA[{
@@ -816,10 +797,39 @@ v_ib4s"},"encrypted_key":"xLplzwvjqZXf7eTaNfAJtQPvWUra-EG-N_varxT
          </figure>
        </t>
        <t>
-         The example can be decrypted using the private keys in <xref target="example.com:p256"/>
+         The example can be decrypted using the keys in <xref target="example.com:p256"/>
          and <xref target="example.com:p384"/>.
        </t>
      </section>
    </section>
+
+  <section anchor="Acknowledgements" title="Acknowledgements">
+    <t>
+      This document builds on the work done in the JOSE working group, so a big thanks goes out
+      to all involved in that work. It is specifically inspired by JWE,
+      so special thanks are due to the authors of that document, Michael B. Jones and
+      Joe Hildebrand.
+    </t>
+    <t>
+      Building on ES6 number normalization was originally
+      proposed by James Manger. This ultimately led to
+      the adoption of the entire ES6 JSON processing model.
+    </t>
+  </section>
+
+    <section anchor="History" title="Document History">
+      <t>[[ to be removed by the RFC Editor before publication as an RFC ]]</t>
+
+      <t>
+	-00
+        <list style="symbols">
+	  <t>
+	    Initial version.
+	  </t>
+	</list>
+      </t>
+
+    </section>
+
  </back>
 </rfc>
